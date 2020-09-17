@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 16, 2020 at 11:13 AM
+-- Generation Time: Sep 17, 2020 at 09:52 AM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -70,8 +70,10 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `lastname` varchar(150) NOT NULL,
   `username` varchar(100) NOT NULL,
   `img` text NOT NULL,
+  `address` text NOT NULL,
   `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false',
-  `confirmed_at` datetime NOT NULL,
+  `email_varified` enum('true','false') NOT NULL DEFAULT 'false',
+  `confirmed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
@@ -79,9 +81,9 @@ CREATE TABLE IF NOT EXISTS `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `phone_varified`, `confirmed_at`) VALUES
-(1, 4, 'nikul', 'vag', 'username', '', 'true', '0000-00-00 00:00:00'),
-(2, 5, 'nikul1', 'vag', 'username1', '', 'true', '0000-00-00 00:00:00');
+INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`) VALUES
+(1, 1, 'nikul2', 'vag', 'username2', '', '', 'true', 'false', NULL),
+(2, 2, 'nikul2', 'vag', 'username1', '1600335988_2048-12.jpg', 'tse tets etsetsete', 'true', 'false', NULL);
 
 -- --------------------------------------------------------
 
@@ -183,15 +185,16 @@ CREATE TABLE IF NOT EXISTS `otps` (
   `phone` varchar(50) NOT NULL,
   `otp` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `otps`
 --
 
 INSERT INTO `otps` (`id`, `phone`, `otp`) VALUES
-(3, '123456', '1234'),
-(4, '1234567', '1234');
+(7, '123456', '1234'),
+(4, '1234567', '1234'),
+(6, '1234562', '1234');
 
 -- --------------------------------------------------------
 
@@ -371,6 +374,20 @@ CREATE TABLE IF NOT EXISTS `slots` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tokens`
+--
+
+DROP TABLE IF EXISTS `tokens`;
+CREATE TABLE IF NOT EXISTS `tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(200) NOT NULL,
+  `token` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -388,17 +405,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `created_at`, `updated_at`) VALUES
-(1, '', '', '', 3, '', '123456', 'tokkkk', 'Enable', '2020-09-16 11:53:53', '2020-09-16 11:53:53'),
-(2, '', '', '', 3, '', '', '', 'Enable', '2020-09-16 11:53:53', '2020-09-16 11:53:53'),
-(4, '123456', 'nikulvaghani@gmail.com', '123456', 3, '', '2qKJwngYNUchzt0XiI3Z', '', 'Enable', '2020-09-16 16:33:58', '2020-09-16 16:33:58'),
-(5, '1234567', 'nikul1vaghani@gmail.com', '123456', 3, '', 'tl0P2Aqby6vX8scF7BUS', '123456', 'Enable', '2020-09-16 16:40:22', '2020-09-16 16:40:22');
+(1, '1234562', 'nikul2vaghani@gmail.com', '123456', 3, '', 'ulfVEM9xLCnF06BvDQW2', '123456', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul111@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48');
 
 -- --------------------------------------------------------
 

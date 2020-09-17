@@ -322,19 +322,22 @@ switch (ENVIRONMENT)
 $firebase_api = "AAAA9qk5Ss8:APA91bG6KptZIsjyv9tnRixr1vqi86OVo3tbQLZhtOn74vzkeO0yzPJnIxDmrIdgqypoDZuDV5m6mLOuQEh_LQE6db0utHYdPacgxJdWXv4e4Sr4l8NiQy8bfOhihNrZLYBU1EURuaAv";
 define('FCM_KEY', $firebase_api);
 
-$qpay_base = "https://demopaymentapi.qpayi.com/api/gateway/v1.0";
+// $qpay_base = "https://demopaymentapi.qpayi.com/api/gateway/v1.0";
 // $qpay_base = "https://qpayi.com:9100/api/gateway/v1.0";
 
-define('QPAY_BASE', $qpay_base);
-define('QPAY_SECRET', "2-2A4Y0I/9e7FLV8");
-define('QPAY_GATEWAYID', "011848343");
+// define('QPAY_BASE', $qpay_base);
+// define('QPAY_SECRET', "2-2A4Y0I/9e7FLV8");
+// define('QPAY_GATEWAYID', "011848343");
 
 // sms gateway
-define('SMS_BASE', "https://rest.nexmo.com/sms/");
-define('SMS_API', "d83371f2");
-define('SMS_SECRET', "SB2eD9Ot6QclT66P");
-define('SMS_FROM', "IbidCM");
-define('C_CODE', "974");
+// define('SMS_BASE', "https://rest.nexmo.com/sms/");
+// define('SMS_API', "d83371f2");
+// define('SMS_SECRET', "SB2eD9Ot6QclT66P");
+// define('SMS_FROM', "IbidCM");
+// define('C_CODE', "974");
+
+define('FROM_EMAIL', "cleanbee@gmail.com");
+
 
 // define('ADMINPATH', 'admin/');
 define('ADMINPATH', 'admin/');
@@ -342,7 +345,7 @@ define('ADMINPATH', 'admin/');
 // define('SPPATH', 'sp_portal/');
 
 define('UPLOADS', 'uploads/');
-define('PROFILE_PATH', UPLOADS.'profile/');
+define('CUSTOMER_PRO', UPLOADS.'customer_profile/');
 define('ADBNR_PATH', UPLOADS.'ad_banner/');
 // define('SPDOC_PATH', UPLOADS.'sp_document/');
 

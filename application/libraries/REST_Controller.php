@@ -415,9 +415,9 @@ abstract class REST_Controller extends CI_Controller {
         $this->_start_rtime = microtime(TRUE);
         
 
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type,      Accept");
-        header("Content-Type: application/json");
+        // header("Access-Control-Allow-Origin: *");
+        // header("Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type,      Accept");
+        // header("Content-Type: application/json");
     }
     
         // Load the rest.php configuration file
@@ -2380,9 +2380,17 @@ abstract class REST_Controller extends CI_Controller {
     * */
     public function getBearerToken() {
         $headers = $this->getAuthorizationHeader();
+
+        // echo $headers;
+        // exit;
+
         // HEADER: Get the access token from the header
         if (!empty($headers)) {
             if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+
+                // print_r($matches);
+                // exit;
+
                 return $matches[1];
             }
         }
@@ -2400,6 +2408,10 @@ abstract class REST_Controller extends CI_Controller {
             $this->rest->db->select('id');
             $this->rest->db->where('token =',$bearer);
             $query1 = $this->rest->db->get('users');
+
+            // echo $this->db->last_query();
+            // exit;
+            
             if ($query1->num_rows() > 0) {
                 $err = "N";
                 return true;

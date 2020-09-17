@@ -14,10 +14,11 @@ class User extends REST_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('User_model','user');
+        $this->load->model('api/User_model','user');
 
         $this->load->database();
         $this->curr_date = date('Y-m-d H:i:s');
+        $this->customer_thumb = array('50'=>'50', '120'=>'120');
     }
 
     public function check_signup_post(){
@@ -231,13 +232,18 @@ class User extends REST_Controller
                         'lastname' => $_POST['lastname'],
                         'username' => $_POST['username'],
                         'img' => '',
-                        'phone_varified' => 'true',
-                        'confirmed_at' => ''
+                        'phone_varified' => 'true'
                     );
                     if($this->db->insert('customers',$signup_customer)){
                         $this->user->update_user_token($user_id);
                         $this->user->update_device_token($user_id,$_POST['device_token']);
                         $customer = $this->user->get_customer_by_id($user_id);
+
+                        $to = $_POST['email'];
+                        $subject = "CleanBee Confirmation";
+                        $message = "<a href='#'>Confirm Your Registration</a>";
+                        $this->load->library('mail');
+                        $this->mail->send_email2($to,$subject,$message);
 
                         $result['status'] = 200;
                         $result['title'] = "Sign Up Success";
@@ -258,6 +264,467 @@ class User extends REST_Controller
 
     }
 
+    public function login_post(){
+
+        $config = [
+            [
+                    'field' => 'username',
+                    'label' => 'username',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'password',
+                    'label' => 'password',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'device_token',
+                    'label' => 'device_token',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            
+            $username_err = 'N';
+            $password_err = 'N';
+            $status_err = 'N';
+
+            $this->db->select('*');
+            $this->db->where('((email = "'.$this->input->post('username').'") OR (phone = "'.$this->input->post('username').'") ) ');
+            $this->db->where('role_id',3);
+            $query1 = $this->db->get('users');
+
+            // echo $this->db->last_query();
+            if ($query1->num_rows() > 0) {
+                $user = $query1->row();
+
+                if($user){
+                    if ($_POST['password'] == $user->password) {
+
+                        if ($user->status == 'Enable') {
+
+                            $this->user->update_user_token($user->id);
+                            $this->user->update_device_token($user->id,$_POST['device_token']);
+                            $customer = $this->user->get_customer_by_id($user->id);
+
+                            $result['status'] = 200;
+                            $result['title'] = "Login Success";
+                            $result['res'] = $customer;
+                            $this->response($result, REST_Controller::HTTP_OK);
+
+                        }else{
+                            $status_err = "Y";
+                        }
+
+                    }else{
+                        $password_err = 'Y';
+                    }
+
+                }else{
+                    $username_err = 'Y';
+                }
+
+            }else{
+                $username_err = 'Y';
+            }
+
+            if($username_err == "Y"){
+                $result['status'] = 310;
+                $result['title'] = "Username incorrect";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($password_err == "Y"){
+                $result['status'] = 320;
+                $result['title'] = "Password incorrect.";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($status_err == "Y"){
+                $result['status'] = 330;
+                $result['title'] = "Your account is inactive, please contact our support center.";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+            
+        }
+
+    }
+
+    public function user_profile_get(){
+        $this->token_check();
+        $user_id = $_GET['user_id'];
+        $customer = $this->user->get_customer_by_id($user_id);
+        
+        $result['status'] = 200;
+        $result['title'] = "User Info";
+        $result['res'] = $customer;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
+    public function update_email_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'email',
+                    'label' => 'email',
+                    'rules' => 'required|callback_emailcheck_edit|callback_chk_valid_email',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($this->user->update_email($_POST['user_id'],$_POST['email'])){
+
+                $to = $_POST['email'];
+                $subject = "CleanBee - Email Update Confirmation";
+                $message = "<a href='#'>Confirm Your Email</a>";
+                $this->load->library('mail');
+                $this->mail->send_email2($to,$subject,$message);
+
+                $result['status'] = 200;
+                $result['title'] = "Check your email for confirmation";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function update_phone_otp_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'phone',
+                    'label' => 'phone',
+                    'rules' => 'required|callback_phonecheck_edit',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            // sent otp
+            $otp = "1234";
+            // $otp = otp_generate(4);
+            // sent_otp();
+            
+            if($this->user->update_otp($_POST['phone'],$otp)){
+                $result['status'] = 200;
+                $result['title'] = "OTP sent on your new phone number";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function update_phone_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'phone',
+                    'label' => 'phone',
+                    'rules' => 'required|callback_phonecheck_edit',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'otp',
+                    'label' => 'otp',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
+
+                if($this->user->update_phone($_POST['user_id'],$_POST['phone'])){
+                    $result['status'] = 200;
+                    $result['title'] = "Phone number updated successfully";
+                    $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+                }
+
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "Wrong OTP";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function update_address_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'address',
+                    'label' => 'address',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($this->user->update_address($_POST['user_id'],$_POST['address'])){
+                $result['status'] = 200;
+                $result['title'] = "Address number updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function update_profile_pic_post(){
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            $image_name = "";
+            if(isset($_FILES['image']['name']) && $_FILES['image']['name'] != ""){
+                    // echo "<pre>";print_r($user);
+
+                    $user = $this->user->get_customer_by_id($_POST['user_id']);
+
+                    if($user['img'] != "" && $user['img'] != "profile_default.png"){
+                        if(file_exists(CUSTOMER_PRO.$user['img']))
+                        {
+                            unlink(CUSTOMER_PRO.$user['img']);
+                            foreach ($this->customer_thumb as $key => $val) {
+                                if (CUSTOMER_PRO ."thumb/" . $key. "x" . $val."_".$user['img'])
+                                {
+                                    unlink(CUSTOMER_PRO ."thumb/" . $key . "x" . $val."_".$user['img']);
+                                }
+                            }
+                        }
+                    }
+
+                    $image_name = time() .'_'.preg_replace("/\s+/", "_", $_FILES['image']['name']);
+
+                    $config['file_name'] = $image_name;
+                    $config['upload_path'] = CUSTOMER_PRO;
+                    $config['allowed_types'] = 'gif|jpg|png|jpeg';
+
+                    $this->upload->initialize($config);
+
+                    if (!$this->upload->do_upload('image')) {
+                            $data['error'] = array('error' => $this->upload->display_errors());
+                            // echo "<pre>";
+                            // print_r($data['error']);
+
+                            $result['status'] = 310;
+                            $result['title'] = "Invalid or corrupt image.";
+                            $result['res'] = (object) array();
+                            $this->response($result, REST_Controller::HTTP_OK);
+
+                    }else{
+                            $data['upload_data'] = $this->upload->data();
+                            $this->load->library('image_lib');
+                            foreach ($this->customer_thumb as $key => $val) {
+                                    $config['image_library'] = 'gd2';
+                                    $config['source_image'] = $_FILES['image']['tmp_name'];
+                                    $config['create_thumb'] = false;
+                                    $config['maintain_ratio'] = false;
+                                    $config['width'] = $key;
+                                    $config['height'] = $val;
+                                    $config['new_image'] = CUSTOMER_PRO . "thumb/" . $config['width'] . "x" . $config['height'] . "_" . $image_name;
+                                    $this->image_lib->clear();
+                                    $this->image_lib->initialize($config);
+                                    $this->image_lib->resize();
+                            }
+
+
+                            $data_customer = array(
+                                'img'=>$image_name
+                                // 'updated_at'=>$this->curr_date
+                            );
+                            $this->db->where('customer_id',$_POST['user_id']);
+                            if($this->db->update('customers',$data_customer)){
+                                $result['status'] = 200;
+                                $result['title'] = "Profile Pic updated successfully";
+                                $result['res'] = (object) array();
+                                $this->response($result, REST_Controller::HTTP_OK);
+                            }
+
+                    }
+            }
+
+        }
+    }
+
+    public function logout_post(){
+        $this->token_check();
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            $this->user->update_user_token($_POST['user_id']);
+            $result['status'] = 200;
+            $result['title'] = "Logout successfully";
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function email_test_post(){
+        $this->load->library('mail');
+        $to = "";
+        $subject = "";
+        $message = "";
+        $this->mail->send_email2($to,$subject,$message);
+    }
+
     public function emailcheck()
     {
         $this->db->select('id');
@@ -265,6 +732,20 @@ class User extends REST_Controller
         $query1 = $this->db->get('users u');
         if ($query1->num_rows() > 0) {
             $this->form_validation->set_message('emailcheck', 'Email Already Exists');
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function emailcheck_edit()
+    {
+        $this->db->select('*');
+        $this->db->where('email =',$this->input->post('email'));
+        $this->db->where('id !=',$this->input->post('user_id'));
+        $query1 = $this->db->get('users');
+        if ($query1->num_rows() > 0) {
+            $this->form_validation->set_message('emailcheck_edit', 'Email Already Exists');
             return false;
         }else{
             return true;
@@ -301,6 +782,21 @@ class User extends REST_Controller
         $query1 = $this->db->get('users u');
         if ($query1->num_rows() > 0) {
             $this->form_validation->set_message('phonecheck', 'Phone Number Already Exists');
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function phonecheck_edit()
+    {
+        $this->db->select('*');
+        $this->db->where('phone =',$this->input->post('phone'));
+        $this->db->where('id !=',$this->input->post('user_id'));
+        $query1 = $this->db->get('users');
+        // echo $this->db->last_query();
+        if ($query1->num_rows() > 0) {
+            $this->form_validation->set_message('phonecheck_edit', 'Phone Number Already Exists');
             return false;
         }else{
             return true;
