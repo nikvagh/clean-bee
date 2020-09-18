@@ -66,9 +66,39 @@
 
             $row = (object) array();
             if ($query->num_rows() > 0) {
+
                 $row = $query->row_array();
+                // echo base_url().CUSTOMER_PRO.'thumb/50x50_'.$row['img'];
+                // exit;
+                if(file_exists(CUSTOMER_PRO.'thumb/120x120_'.$row['img'])){
+                    $row['profile_pic_url'] = base_url().CUSTOMER_PRO.'thumb/120x120_'.$row['img'];
+                }else{
+                    $row['profile_pic_url'] = base_url().CUSTOMER_PRO.'thumb/120x120_'.'profile_default.png';
+                }
+
             }
             return $row;
+        }
+
+        public function get_notification_by_user_id($user_id){
+            $this->db->select('n.id,n.user_id,n.title,n.message,n.is_new,n.created_at');
+            $this->db->from('notifications n');
+            $this->db->where('n.user_id',$user_id);
+            $query = $this->db->get();
+
+            $result = (object) array();
+            if ($query->num_rows() > 0) {
+                $result = $query->result();
+            }
+            return $result;
+        }
+
+        public function get_total_new_notification_by_user_id($user_id){
+            $this->db->select('count(n.id) as total');
+            $this->db->from('notifications n');
+            $this->db->where('n.user_id',$user_id);
+            $query = $this->db->get();
+            return $query->num_rows();
         }
 
         public function update_email($user_id,$email){
@@ -123,6 +153,44 @@
             );
             $this->db->where('customer_id',$user_id);
             if($this->db->update('customers',$data_user)){
+                $success = "Y";
+            }
+
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        public function update_username($user_id,$username){
+            $success = "N";
+
+            $data_user = array(
+                'username'=>$username
+                // 'updated_at'=>$this->curr_date
+            );
+            $this->db->where('customer_id',$user_id);
+            if($this->db->update('customers',$data_user)){
+                $success = "Y";
+            }
+
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        public function update_password($user_id,$password){
+            $success = "N";
+
+            $data_user = array(
+                'password'=>$password
+                // 'updated_at'=>$this->curr_date
+            );
+            $this->db->where('id',$user_id);
+            if($this->db->update('users',$data_user)){
                 $success = "Y";
             }
 

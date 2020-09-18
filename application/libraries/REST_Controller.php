@@ -415,9 +415,9 @@ abstract class REST_Controller extends CI_Controller {
         $this->_start_rtime = microtime(TRUE);
         
 
-        // header("Access-Control-Allow-Origin: *");
-        // header("Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type,      Accept");
-        // header("Content-Type: application/json");
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type,      Accept");
+        header("Content-Type: application/json");
     }
     
         // Load the rest.php configuration file

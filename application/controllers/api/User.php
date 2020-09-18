@@ -5,12 +5,6 @@ use Restserver\Libraries\REST_Controller;
 
 class User extends REST_Controller
 {
-
-    /**
-     * Get All Data from this method.
-     *
-     * @return Response
-     */
     public function __construct()
     {
         parent::__construct();
@@ -382,6 +376,19 @@ class User extends REST_Controller
         $this->response($result, REST_Controller::HTTP_OK);
     }
 
+    public function user_notificaion_get(){
+        $this->token_check();
+        $user_id = $_GET['user_id'];
+        $notifications = $this->user->get_notification_by_user_id($user_id);
+        $total_new = $this->user->get_total_new_notification_by_user_id($user_id);
+        
+        $result['status'] = 200;
+        $result['title'] = "Notification list";
+        $result['res']['total_new'] = $total_new;
+        $result['res']['notification'] = $notifications;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
     public function update_email_post(){
         $this->token_check();
 
@@ -585,6 +592,94 @@ class User extends REST_Controller
         }
     }
 
+    public function update_username_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'username',
+                    'label' => 'username',
+                    'rules' => 'required|callback_usernamecheck_edit',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($this->user->update_username($_POST['user_id'],$_POST['username'])){
+                $result['status'] = 200;
+                $result['title'] = "Username updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
+    public function update_password_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'password',
+                    'label' => 'password',
+                    'rules' => 'required|min_length[6]',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'confirm_password',
+                    'label' => 'Confirm Password',
+                    'rules' => 'required|matches[password]',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($this->user->update_password($_POST['user_id'],$_POST['password'])){
+                $result['status'] = 200;
+                $result['title'] = "Password updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
     public function update_profile_pic_post(){
 
         $config = [
@@ -769,6 +864,19 @@ class User extends REST_Controller
         $query1 = $this->db->get('customers c');
         if ($query1->num_rows() > 0) {
             $this->form_validation->set_message('usernamecheck', 'Username Already Exists');
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function usernamecheck_edit(){
+        $this->db->select('id');
+        $this->db->where('username =',$this->input->post('username'));
+        $this->db->where('customer_id !=',$this->input->post('user_id'));
+        $query1 = $this->db->get('customers c');
+        if ($query1->num_rows() > 0) {
+            $this->form_validation->set_message('usernamecheck_edit', 'Username Already Exists');
             return false;
         }else{
             return true;
