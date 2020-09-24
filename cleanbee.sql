@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 17, 2020 at 09:52 AM
+-- Generation Time: Sep 24, 2020 at 02:32 PM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -24,6 +24,30 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ads`
+--
+
+DROP TABLE IF EXISTS `ads`;
+CREATE TABLE IF NOT EXISTS `ads` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` text NOT NULL,
+  `img` text NOT NULL,
+  `status` enum('Enable','Disable') NOT NULL DEFAULT 'Enable',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `ads`
+--
+
+INSERT INTO `ads` (`id`, `title`, `img`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'test test', '', 'Enable', '2020-09-18 17:00:40', '2020-09-18 17:00:40');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `capabilities`
 --
 
@@ -32,12 +56,53 @@ CREATE TABLE IF NOT EXISTS `capabilities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `arabic_name` varchar(200) NOT NULL,
-  `laundry` int(11) NOT NULL,
+  `laundry_id` int(11) NOT NULL,
   `image` text NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `capabilities`
+--
+
+INSERT INTO `capabilities` (`id`, `name`, `arabic_name`, `laundry_id`, `image`, `created_at`, `updated_at`) VALUES
+(1, 'Iron', 'Iron', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(2, 'Wash & Iron', 'Wash & Iron', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(3, 'Dry clean', 'Dry clean', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(4, 'Iron', 'Iron', 2, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(5, 'Wash & Iron', 'Wash & Iron', 2, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(6, 'Dry clean', 'Dry clean', 2, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cart`
+--
+
+DROP TABLE IF EXISTS `cart`;
+CREATE TABLE IF NOT EXISTS `cart` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `laundry_id` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `ss_ids` text NOT NULL,
+  `price` double(20,2) NOT NULL,
+  `price_total` double(20,2) NOT NULL,
+  `removed` enum('Y','N') NOT NULL DEFAULT 'N' COMMENT 'Y,N',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `price_total`, `removed`, `created_at`, `updated_at`) VALUES
+(10, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-24 16:00:05', '2020-09-24 15:00:54'),
+(11, 1, 1, 5, '2,1', 30.00, 150.00, 'N', '2020-09-24 16:05:37', '2020-09-24 15:00:54');
 
 -- --------------------------------------------------------
 
@@ -55,6 +120,26 @@ CREATE TABLE IF NOT EXISTS `contents` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `currency`
+--
+
+DROP TABLE IF EXISTS `currency`;
+CREATE TABLE IF NOT EXISTS `currency` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `currency_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `currency`
+--
+
+INSERT INTO `currency` (`id`, `currency_name`) VALUES
+(1, 'QAR');
 
 -- --------------------------------------------------------
 
@@ -82,8 +167,8 @@ CREATE TABLE IF NOT EXISTS `customers` (
 --
 
 INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`) VALUES
-(1, 1, 'nikul2', 'vag', 'username2', '', '', 'true', 'false', NULL),
-(2, 2, 'nikul2', 'vag', 'username1', '1600335988_2048-12.jpg', 'tse tets etsetsete', 'true', 'false', NULL);
+(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL),
+(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL);
 
 -- --------------------------------------------------------
 
@@ -98,13 +183,22 @@ CREATE TABLE IF NOT EXISTS `discounts` (
   `discount_type` enum('percentage','value') NOT NULL,
   `percentage` varchar(10) NOT NULL,
   `value` double(20,2) NOT NULL,
-  `applied_to` enum('1','2','3') NOT NULL COMMENT '1=total amount,\r\n2=order_amount,\r\n3=total_fee',
+  `applied_to` enum('1','2','3') NOT NULL COMMENT '1=sub_total,\r\n2=grand_total,\r\n3=delivery_fee',
   `send_push_notification` enum('Y','N') NOT NULL,
+  `expiry_date` datetime DEFAULT NULL,
   `vendors` text NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `discounts`
+--
+
+INSERT INTO `discounts` (`id`, `name`, `discount_type`, `percentage`, `value`, `applied_to`, `send_push_notification`, `expiry_date`, `vendors`, `created_at`, `updated_at`) VALUES
+(1, 'test10', 'percentage', '10', 0.00, '2', 'Y', '2020-09-07 19:25:36', '1,9', '2020-09-24 19:14:41', '2020-09-24 19:14:41'),
+(2, 'test20', 'value', '0', 20.00, '1', 'N', '2020-09-26 19:25:55', '5,3,2,3', '2020-09-24 19:14:41', '2020-09-24 19:14:41');
 
 -- --------------------------------------------------------
 
@@ -123,7 +217,71 @@ CREATE TABLE IF NOT EXISTS `laundries` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `laundries`
+--
+
+INSERT INTO `laundries` (`id`, `name`, `arabic_name`, `does_require_car`, `sort_order`, `image`, `created_at`, `updated_at`) VALUES
+(1, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(2, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(3, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(4, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(5, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(6, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(7, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(8, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(9, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(10, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(11, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(12, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(13, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(14, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(15, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(16, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(17, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(18, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(19, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(20, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(21, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(22, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(23, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(24, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(25, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(26, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(27, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(28, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(29, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(30, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(31, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(32, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` text NOT NULL,
+  `message` text NOT NULL,
+  `is_new` enum('true','false') NOT NULL DEFAULT 'true' COMMENT 'true,false',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_new`, `created_at`, `updated_at`) VALUES
+(1, 2, 'tset tet s', 'messg', 'false', '2020-09-18 17:17:03', '2020-09-18 17:17:03'),
+(2, 2, 'test title 2', 'msg 2', 'true', '2020-09-18 17:17:03', '2020-09-18 17:17:03');
 
 -- --------------------------------------------------------
 
@@ -352,7 +510,87 @@ CREATE TABLE IF NOT EXISTS `shops` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `shops`
+--
+
+INSERT INTO `shops` (`id`, `vendor_id`, `shop_name`, `phone`, `description`, `opening_time`, `closing_time`, `latitude`, `longitude`, `range_in_km`, `cleanbee_percentage`, `address`, `image`, `created_at`, `updated_at`) VALUES
+(1, 1, 'shop1', '123456789', 'shop des1', '04:00:00', '06:00:00', '25.2617', '72.1596', '10', '5', 'test addres 1', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59'),
+(2, 2, 'shop2', '123456789', 'shop des 2', '09:00:00', '10:00:00', '25.2323', '73.256', '20', '7', 'test address 2', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shop_favourite`
+--
+
+DROP TABLE IF EXISTS `shop_favourite`;
+CREATE TABLE IF NOT EXISTS `shop_favourite` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `shop_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `shop_favourite`
+--
+
+INSERT INTO `shop_favourite` (`id`, `shop_id`, `user_id`) VALUES
+(4, 2, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shop_ratings`
+--
+
+DROP TABLE IF EXISTS `shop_ratings`;
+CREATE TABLE IF NOT EXISTS `shop_ratings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `shop_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rate` float NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `shop_ratings`
+--
+
+INSERT INTO `shop_ratings` (`id`, `shop_id`, `user_id`, `rate`) VALUES
+(1, 1, 1, 2.6),
+(2, 1, 2, 2.3),
+(3, 1, 3, 5),
+(4, 1, 4, 4.5);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shop_services`
+--
+
+DROP TABLE IF EXISTS `shop_services`;
+CREATE TABLE IF NOT EXISTS `shop_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `shop_id` int(11) NOT NULL,
+  `laundry_id` int(11) NOT NULL,
+  `capability_id` int(11) NOT NULL,
+  `standard_amt` double(20,2) NOT NULL,
+  `urgent_amt` double(20,2) NOT NULL,
+  `currency` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `shop_services`
+--
+
+INSERT INTO `shop_services` (`id`, `shop_id`, `laundry_id`, `capability_id`, `standard_amt`, `urgent_amt`, `currency`) VALUES
+(1, 1, 2, 4, 10.00, 15.00, 1),
+(2, 1, 2, 5, 20.00, 22.00, 1);
 
 -- --------------------------------------------------------
 
@@ -369,7 +607,16 @@ CREATE TABLE IF NOT EXISTS `slots` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `slots`
+--
+
+INSERT INTO `slots` (`id`, `start_time`, `end_time`, `available`, `created_at`, `updated_at`) VALUES
+(1, '24:50:18', '17:45:18', 'Y', '2020-09-18 17:52:42', '2020-09-18 17:52:42'),
+(2, '10:50:18', '17:45:18', 'Y', '2020-09-18 17:52:49', '2020-09-18 17:52:49'),
+(3, '19:50:18', '21:50:18', 'Y', '2020-09-18 17:52:49', '2020-09-18 17:52:49');
 
 -- --------------------------------------------------------
 
@@ -397,7 +644,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` varchar(50) NOT NULL,
   `email` varchar(200) NOT NULL,
   `password` varchar(200) NOT NULL,
-  `role_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL COMMENT '1=admin 2=vendor 3=customer 4=rider',
   `privileges` text NOT NULL,
   `token` text NOT NULL,
   `device_token` text NOT NULL,
@@ -405,15 +652,16 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `created_at`, `updated_at`) VALUES
-(1, '1234562', 'nikul2vaghani@gmail.com', '123456', 3, '', 'ulfVEM9xLCnF06BvDQW2', '123456', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
-(2, '123456', 'nikul111@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48');
+(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'gKsfTk83zwtMDa2PncYi', '123456', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul111@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
+(3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48');
 
 -- --------------------------------------------------------
 
@@ -428,7 +676,14 @@ CREATE TABLE IF NOT EXISTS `vendors` (
   `name` varchar(50) NOT NULL,
   `confirmed_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `vendors`
+--
+
+INSERT INTO `vendors` (`id`, `vendor_id`, `name`, `confirmed_at`) VALUES
+(1, 3, 'vendor test', '2020-09-15 19:18:33');
 
 -- --------------------------------------------------------
 

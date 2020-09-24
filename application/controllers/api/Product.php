@@ -60,11 +60,15 @@ class Product extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
+            $result['res'] = [];
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
-            $laundries = $this->product->get_laundries($_POST['per_page'],$_POST['page_number']);
+            $search = "";
+            if(isset($_POST['search'])){
+                $search = $_POST['search'];
+            }
+            $laundries = $this->product->get_laundries($_POST['per_page'],$_POST['page_number'],$search);
             $result['status'] = 200;
             $result['title'] = "Laundries list";
             $result['res'] = $laundries;
@@ -77,6 +81,12 @@ class Product extends REST_Controller
 
         $config = [
             [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
                     'field' => 'per_page',
                     'label' => 'per_page',
                     'rules' => 'required|numeric',
@@ -87,6 +97,260 @@ class Product extends REST_Controller
                     'label' => 'page_number',
                     'rules' => 'required|numeric',
                     'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = [];
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            $filter = "";
+            if(isset($_POST['filter']) && $_POST['filter']){
+                $filter = $_POST['filter'];
+                if($_POST['filter'] != "all" && $_POST['filter'] != "favourite" && $_POST['filter'] != "nearby"){
+                    $result['status'] = 400;
+                    $result['title'] = "Filter values must be all,favourite or nearby";
+                    $result['res'] = [];
+                    $this->response($result, REST_Controller::HTTP_OK);
+                }
+            }
+
+            $shops = $this->product->get_shops($_POST['per_page'],$_POST['page_number'],$filter,$_POST['user_id']);
+            
+            $result['status'] = 200;
+            $result['title'] = "Shops list";
+            $result['res'] = $shops;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function get_capabilities_post(){
+        $this->token_check();
+        $config = [
+            [
+                    'field' => 'shop_id',
+                    'label' => 'shop_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'laundry_id',
+                    'label' => 'laundry_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = [];
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            $capabilities = $this->product->get_capabilities($_POST['shop_id'],$_POST['laundry_id']);
+            $result['status'] = 200;
+            $result['title'] = "Capabilities list";
+            $result['res'] = $capabilities;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function add_to_cart_post(){
+        $this->token_check();
+        // $_POST = json_decode($this->input->raw_input_stream,true);
+        $_POST = $this->request->body;
+        // print_r($_POST);
+        // exit;
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'laundry_id',
+                    'label' => 'laundry_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'qty',
+                    'label' => 'qty',
+                    'rules' => 'required|numeric',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'order_type',
+                    'label' => 'order_type',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'services[]',
+                    'label' => 'services',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if(empty($_POST['services'])){
+                $result['status'] = 310;
+                $result['title'] = "Select atleast one service";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($_POST['order_type'] != "standard" && $_POST['order_type'] != "urgent"){
+                $result['status'] = 320;
+                $result['title'] = "Select atleast one service";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($this->product->add_to_cart($_POST)){
+                $result['status'] = 200;
+                $result['title'] = "Cart data updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 330;
+                $result['title'] = "Add to cart failed. please try again";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
+    public function update_cart_post(){
+        $this->token_check();
+        $_POST = $this->request->body;
+
+        $config = [
+            [
+                    'field' => 'cart_id',
+                    'label' => 'cart_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'user_id',
+                    'label' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'laundry_id',
+                    'label' => 'laundry_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'qty',
+                    'label' => 'qty',
+                    'rules' => 'required|numeric',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'order_type',
+                    'label' => 'order_type',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'services[]',
+                    'label' => 'services',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if(empty($_POST['services'])){
+                $result['status'] = 310;
+                $result['title'] = "Select atleast one service";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($_POST['order_type'] != "standard" && $_POST['order_type'] != "urgent"){
+                $result['status'] = 320;
+                $result['title'] = "Enter valid order type";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($this->product->update_cart($_POST)){
+                $result['status'] = 200;
+                $result['title'] = "Cart data updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 330;
+                $result['title'] = "Update cart failed. please try again";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
+    public function remove_from_cart_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
             ]
         ];
 
@@ -103,69 +367,187 @@ class Product extends REST_Controller
             }
             $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
-
         }else{
-            $shops = $this->product->get_shops($_POST['per_page'],$_POST['page_number']);
-            
-            $result['status'] = 200;
-            $result['title'] = "Shops list";
-            $result['res'] = $shops;
+
+            $cart_id = "";
+            if(isset($_POST['cart_id'])){
+                $cart_id = $_POST['cart_id'];
+            }
+            if($this->product->remove_from_cart($_POST['user_id'],$cart_id)){
+                $result['status'] = 200;
+                $result['title'] = "Cart data updated successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function shop_to_favourite_post(){
+        $this->token_check();
+
+        $config = [
+            [
+                'field' => 'shop_id',
+                'label' => 'shop_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'action',
+                'label' => 'action',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($_POST['action'] != "add" && $_POST['action'] != "remove"){
+                $result['status'] = 320;
+                $result['title'] = "Action value must be add or remove";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            $action_status = $this->product->shop_to_favourite($_POST['shop_id'],$_POST['user_id'],$_POST['action']);
+
+            if($action_status == "already"){
+                $result['status'] = 310;
+                $result['title'] = "Shop already added to your favourite list";
+            }elseif($action_status == "add"){
+                $result['status'] = 200;
+                $result['title'] = "Shop added to your favourite list";
+            }elseif($action_status == "remove"){
+                $result['status'] = 200;
+                $result['title'] = "Shop removed from your favourite list";
+            }
+
+            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }
     }
 
-    // public function index_get($id = 0)
-    // {
-    //     $this->token_check();
+    public function get_cart_get(){
+        $this->token_check();
+        $user_id = $_GET['user_id'];
+        $cart = $this->product->get_cart($user_id);
         
-    //     if (!empty($id)) {
-    //         $data = $this->db->get_where("products", ['id' => $id])->row_array();
-    //     } else {
-    //         $data = $this->db->get("products")->result();
-    //     }
+        $result['status'] = 200;
+        $result['title'] = "Cart";
+        $result['res'] = $cart;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
 
-    //     $result['status'] = 401;
-    //     $result['title'] = "Success!";
-    //     $result['res'] = $data;
-        
-    //     $this->response($result, REST_Controller::HTTP_OK);
-    // }
+    public function switch_order_type_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_type',
+                'label' => 'order_type',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+        ];
 
-    // /**
-    //  * Get All Data from this method.
-    //  *
-    //  * @return Response
-    //  */
-    // public function index_post()
-    // {
-    //     $input = $this->input->post();
-    //     $this->db->insert('products', $input);
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
 
-    //     $this->response(['Product created successfully.'], REST_Controller::HTTP_OK);
-    // }
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
 
-    // /**
-    //  * Get All Data from this method.
-    //  *
-    //  * @return Response
-    //  */
-    // public function index_put($id)
-    // {
-    //     $input = $this->put();
-    //     $this->db->update('products', $input, array('id' => $id));
+            if($_POST['order_type'] != "standard" && $_POST['order_type'] != "urgent"){
+                $result['status'] = 320;
+                $result['title'] = "Enter valid order type";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
 
-    //     $this->response(['Product updated successfully.'], REST_Controller::HTTP_OK);
-    // }
+            if($this->product->switch_order_type($_POST)){
+                $result['status'] = 200;
+                $result['title'] = "Order type change successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
 
-    // /**
-    //  * Get All Data from this method.
-    //  *
-    //  * @return Response
-    //  */
-    // public function index_delete($id)
-    // {
-    //     $this->db->delete('products', array('id' => $id));
+    public function check_discount_code_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'discount_code',
+                'label' => 'discount_code',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'vendor_id',
+                'label' => 'vendor_id',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
 
-    //     $this->response(['Product deleted successfully.'], REST_Controller::HTTP_OK);
-    // }
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($discount = $this->product->check_discount_code($_POST['discount_code'],$_POST['vendor_id'])){
+                $result['status'] = 200;
+                $result['title'] = "Discount Details";
+                $result['res'] = $discount;
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "Invalid discount code";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
 }

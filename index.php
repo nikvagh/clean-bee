@@ -348,6 +348,6 @@ define('UPLOADS', 'uploads/');
 define('CUSTOMER_PRO', UPLOADS.'customer_profile/');
 define('ADBNR_PATH', UPLOADS.'ad_banner/');
 define('LAUNDRY_IMG_PATH', UPLOADS.'laundry/');
-// define('SPDOC_PATH', UPLOADS.'sp_document/');
+define('CAPABILITY_IMG_PATH', UPLOADS.'capabilities/');
 
 require_once BASEPATH.'core/CodeIgniter.php';
