@@ -812,6 +812,62 @@ class User extends REST_Controller
         }
     }
 
+    public function add_credit_to_wallet_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'amount',
+                'label' => 'amount',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            $wallet_data = $this->user->add_credit_to_wallet($_POST['user_id'],$_POST['amount']);
+
+            $result['status'] = 200;
+            if($wallet_data['status'] == 'add'){
+                $result['title'] = "Credit added to wallet successfully";
+            }else if($wallet_data['status'] == 'not_add'){
+                $result['title'] = "Credit addition has been failed! please try again";
+            }
+
+            $result['res'] = $wallet_data['user'];
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function get_wallet_get(){
+        $this->token_check();
+        $user_id = $_GET['user_id'];
+        $customer = $this->user->get_customer_wallet($user_id);
+
+        $result['status'] = 200;
+        $result['title'] = "Customer wallet";
+        $result['res'] = $customer;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
     public function email_test_post(){
         $this->load->library('mail');
         $to = "";

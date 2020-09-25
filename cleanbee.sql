@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 24, 2020 at 02:32 PM
+-- Generation Time: Sep 25, 2020 at 02:07 PM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `cart` (
 
 INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `price_total`, `removed`, `created_at`, `updated_at`) VALUES
 (10, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-24 16:00:05', '2020-09-24 15:00:54'),
-(11, 1, 1, 5, '2,1', 30.00, 150.00, 'N', '2020-09-24 16:05:37', '2020-09-24 15:00:54');
+(11, 1, 1, 8, '2,1', 30.00, 240.00, 'N', '2020-09-24 16:05:37', '2020-09-25 10:25:13');
 
 -- --------------------------------------------------------
 
@@ -159,6 +159,8 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false',
   `email_varified` enum('true','false') NOT NULL DEFAULT 'false',
   `confirmed_at` datetime DEFAULT NULL,
+  `refer_from` int(11) NOT NULL,
+  `wallet` double(20,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
@@ -166,9 +168,9 @@ CREATE TABLE IF NOT EXISTS `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`) VALUES
-(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL),
-(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL);
+INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`) VALUES
+(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00),
+(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL, 0, 0.00);
 
 -- --------------------------------------------------------
 
@@ -292,7 +294,7 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_new`, `cre
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `customer_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `rider_id` int(11) NOT NULL,
   `shop_id` int(11) NOT NULL,
   `order_type` varchar(200) NOT NULL,
@@ -305,6 +307,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `delivery_time` varchar(10) NOT NULL,
   `order_status` int(11) NOT NULL,
   `order_cost` double(20,2) NOT NULL,
+  `delivery_fee` double(20,2) NOT NULL,
   `pick_lat` varchar(50) NOT NULL,
   `pick_lng` varchar(50) NOT NULL,
   `shop_lat` varchar(50) NOT NULL,
@@ -312,7 +315,68 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `rider_id`, `shop_id`, `order_type`, `pick_location`, `pickup_date`, `pickup_hour`, `pickup_time`, `delivery_date`, `delivery_hour`, `delivery_time`, `order_status`, `order_cost`, `delivery_fee`, `pick_lat`, `pick_lng`, `shop_lat`, `shop_lng`, `created_at`, `updated_at`) VALUES
+(1, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 16:58:57', '0000-00-00 00:00:00'),
+(2, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:46', '0000-00-00 00:00:00'),
+(3, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:54', '0000-00-00 00:00:00'),
+(4, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:01:04', '0000-00-00 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_additional_info`
+--
+
+DROP TABLE IF EXISTS `order_additional_info`;
+CREATE TABLE IF NOT EXISTS `order_additional_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `street_no` varchar(100) NOT NULL,
+  `house_building_no` varchar(100) NOT NULL,
+  `appartment_office_name` varchar(200) NOT NULL,
+  `floor` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+DROP TABLE IF EXISTS `order_items`;
+CREATE TABLE IF NOT EXISTS `order_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `laundry_id` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `ss_ids` text NOT NULL,
+  `price` double(20,2) NOT NULL,
+  `price_total` double(20,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `price_total`) VALUES
+(1, 0, 2, 3, '1', 10.00, 30.00),
+(2, 0, 1, 8, '2,1', 30.00, 240.00),
+(3, 1, 2, 3, '1', 10.00, 30.00),
+(4, 1, 1, 8, '2,1', 30.00, 240.00),
+(5, 2, 2, 3, '1', 10.00, 30.00),
+(6, 2, 1, 8, '2,1', 30.00, 240.00),
+(7, 3, 2, 3, '1', 10.00, 30.00),
+(8, 3, 1, 8, '2,1', 30.00, 240.00),
+(9, 4, 2, 3, '1', 10.00, 30.00),
+(10, 4, 1, 8, '2,1', 30.00, 240.00);
 
 -- --------------------------------------------------------
 
@@ -326,10 +390,29 @@ CREATE TABLE IF NOT EXISTS `order_status` (
   `status_code` varchar(100) NOT NULL,
   `status_title` varchar(150) NOT NULL,
   `status` enum('Enable','Disable') NOT NULL DEFAULT 'Enable',
+  `sort_code` int(11) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `order_status`
+--
+
+INSERT INTO `order_status` (`id`, `status_code`, `status_title`, `status`, `sort_code`, `created_at`, `updated_at`) VALUES
+(1, 'pending', 'pending', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(2, 'assigned', 'assigned', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(3, 'start', 'start', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(4, 'picked_up_from_customer', 'picked_up_from_customer', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(5, 'dropped_to_vendor', 'dropped_to_vendor', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(6, 'processing_completed', 'processing_completed', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(7, 'ready_to_deliver', 'ready_to_deliver', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(8, 'start_to_vendor', 'start_to_vendor', 'Enable', 0, '2020-09-25 13:06:41', '2020-09-25 13:06:41'),
+(9, 'picked_up_from_vendor', 'picked_up_from_vendor', 'Enable', 0, '2020-09-25 13:08:22', '2020-09-25 13:08:22'),
+(10, 'dropped_to_customer', 'dropped_to_customer', 'Enable', 0, '2020-09-25 13:08:22', '2020-09-25 13:08:22'),
+(11, 'completed', 'completed', 'Enable', 0, '2020-09-25 13:08:22', '2020-09-25 13:08:22'),
+(12, 'cancel', 'cancel', 'Enable', 0, '2020-09-25 13:08:22', '2020-09-25 13:08:22');
 
 -- --------------------------------------------------------
 
@@ -371,21 +454,27 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `net_amount` double(20,2) NOT NULL,
   `paypal_fee` double(20,2) NOT NULL,
   `email` varchar(200) NOT NULL,
-  `payment_type` varchar(50) NOT NULL,
+  `payment_type` varchar(50) NOT NULL COMMENT 'credit_card,cash,wallet',
   `date_received` datetime NOT NULL,
   `address` text NOT NULL,
-  `status` varchar(50) NOT NULL,
+  `status` enum('pending','paid','failed') NOT NULL COMMENT 'paid,pending,failed',
   `order_amount` double(20,2) NOT NULL,
-  `discount` varchar(50) NOT NULL,
+  `discount` double(20,2) NOT NULL,
   `delivery_fee` double(20,2) NOT NULL,
-  `admin_commision_percentage` varchar(10) NOT NULL,
-  `online_payment_commision` varchar(10) NOT NULL,
+  `online_payment_commision` double(20,2) NOT NULL,
   `payable_amount_to_shop` double(20,2) NOT NULL,
   `commission_amount` double(20,2) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `order_id`, `shop_id`, `payment_token`, `fill_name`, `total_amount`, `net_amount`, `paypal_fee`, `email`, `payment_type`, `date_received`, `address`, `status`, `order_amount`, `discount`, `delivery_fee`, `online_payment_commision`, `payable_amount_to_shop`, `commission_amount`, `created_at`, `updated_at`) VALUES
+(1, 4, 1, 'token', 'nik test@gmail.com', 45.00, 45.00, 0.00, 'test@gmail.com', 'credit_card', '2020-09-25 17:01:04', 'testt test', 'paid', 40.00, 0.00, 5.00, 0.00, 42.75, 2.25, '2020-09-25 17:01:04', '2020-09-25 19:31:04');
 
 -- --------------------------------------------------------
 
@@ -700,6 +789,32 @@ CREATE TABLE IF NOT EXISTS `vendor_payments` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wallet_history`
+--
+
+DROP TABLE IF EXISTS `wallet_history`;
+CREATE TABLE IF NOT EXISTS `wallet_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `amount` double(20,2) NOT NULL,
+  `operation_type` enum('credit','debit') NOT NULL,
+  `description` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `wallet_history`
+--
+
+INSERT INTO `wallet_history` (`id`, `user_id`, `amount`, `operation_type`, `description`, `created_at`, `updated_at`) VALUES
+(1, 1, -5.00, 'credit', 'Add credit to wallet by customer', '2020-09-25 11:39:08', '2020-09-25 11:39:08'),
+(2, 1, 6.00, 'credit', 'Add credit to wallet by customer', '2020-09-25 11:39:13', '2020-09-25 11:39:13');
 
 -- --------------------------------------------------------
 

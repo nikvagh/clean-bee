@@ -314,7 +314,7 @@
         }
 
         public function get_cart($user_id){
-            $this->db->select('c.id,l.name as laundry,c.qty,c.ss_ids as capabilities,c.price,c.price_total');
+            $this->db->select('c.id,l.id as laundry_id,l.name as laundry,c.qty,c.ss_ids as capabilities,c.price,c.price_total');
             // $this->db->where_in('ss.id',$services);
             $this->db->from('cart c');
             $this->db->join('laundries l','l.id = c.laundry_id','left');
@@ -414,6 +414,124 @@
             }
 
             return $row;
+        }
+
+        public function get_shop_by_id($shop_id){
+            $this->db->select('s.id,s.cleanbee_percentage');
+            $this->db->where('s.id',$shop_id);
+            $this->db->from('shops s');
+            $query = $this->db->get();
+
+            $row = (object) array();
+            if ($query->num_rows() > 0) {
+                $row = $query->row();
+            }
+            return $row;
+        }
+
+        public function add_order($request){
+
+            // $customer = $this->user->get_customer_by_id($request['user_id']);
+            // print_r($customer);
+            
+            $shop = $this->get_shop_by_id($request['shop_id']);
+            // print_r($shop);
+
+            $system_per = $shop->cleanbee_percentage;
+            $net_amount = $request['net_amount'];
+            $commission_amount = ($net_amount*$system_per)/100;
+            $payable_amount_to_shop = $net_amount - $commission_amount;
+            // exit;
+
+            $success = "N";
+
+            $cart_data = $this->get_cart($request['user_id']);
+            // print_r($cart_data);
+
+            if(!empty($cart_data)){
+
+                $order_data = array();
+                $order_data['user_id'] = $request['user_id'];
+                $order_data['shop_id'] = $request['shop_id'];
+                $order_data['order_type'] = $request['order_type'];
+                $order_data['pick_location'] = $request['pick_location'];
+                $order_data['pickup_date'] = $request['pickup_date'];
+                $order_data['pickup_hour'] = $request['pickup_hour'];
+                $order_data['pickup_time'] = $request['pickup_time'];
+                $order_data['delivery_date'] = $request['delivery_date'];
+                $order_data['delivery_hour'] = $request['delivery_hour'];
+                $order_data['delivery_time'] = $request['delivery_time'];
+                $order_data['order_cost'] = $net_amount;
+                $order_data['delivery_fee'] = $request['delivery_fee'];
+                $order_data['pick_lat'] = $request['pick_lat'];
+                $order_data['pick_lng'] = $request['pick_lng'];
+                $order_data['shop_lat'] = $request['shop_lat'];
+                $order_data['shop_lng'] = $request['shop_lng'];
+
+                $order_data['order_status'] = 1;
+                $order_data['created_at'] = $this->curr_date;
+
+                if($this->db->insert('orders',$order_data)){
+                    
+                    $order_id = $this->db->insert_id();
+
+                    foreach($cart_data as $key=>$val){
+                        $order_item = array();
+                        $order_item['order_id'] = $order_id;
+                        $order_item['laundry_id'] = $val->laundry_id;
+                        $order_item['qty'] = $val->qty;
+                        $order_item['ss_ids'] = implode(',',$val->capabilities);
+                        $order_item['price'] = $val->price;
+                        $order_item['price_total'] = $val->price_total;
+    
+                        if($this->db->insert('order_items',$order_item)){
+                    
+                        }
+                    }
+
+                    $payment_data = array();
+                    $payment_data['order_id'] = $order_id;
+                    $payment_data['shop_id'] = $request['shop_id'];
+                    $payment_data['payment_token'] = $request['payment_token'];
+                    $payment_data['fill_name'] = $request['payment_name'];
+                    $payment_data['total_amount'] = $request['total_amount'];
+                    $payment_data['net_amount'] = $request['net_amount'];
+                    // $payment_data['paypal_fee'] = $val['total_amount'];
+                    $payment_data['email'] = $request['payment_email'];
+                    $payment_data['payment_type'] = $request['payment_type'];
+                    if($request['payment_type'] == "credit_card" || $request['payment_type'] == "wallet"){
+                        $payment_data['date_received'] = $this->curr_date;
+                    }
+                    $payment_data['address'] = $request['payment_address'];
+                    if($request['payment_type'] == "credit_card" || $request['payment_type'] == "wallet"){
+                        $payment_data['status'] = 'paid';
+                    }else{
+                        $payment_data['status'] = 'pending';
+                    }
+                    $payment_data['order_amount'] = $request['order_amount'];
+                    $payment_data['discount'] = $request['discount'];
+                    $payment_data['delivery_fee'] = $request['delivery_fee'];
+                    $payment_data['online_payment_commision'] = $request['online_payment_commision'];
+
+                    $payment_data['payable_amount_to_shop'] = $payable_amount_to_shop;
+                    $payment_data['commission_amount'] = $commission_amount;
+                    $payment_data['created_at'] = $this->curr_date;
+                    if($this->db->insert('payments',$payment_data)){
+                        $success = "Y";
+                    }
+
+                }
+
+            }else{
+
+            }
+
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+
         }
         
     }

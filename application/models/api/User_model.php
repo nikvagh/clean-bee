@@ -58,7 +58,7 @@
         }
 
         public function get_customer_by_id($user_id){
-            $this->db->select('u.id,u.phone,u.email,u.password,u.role_id,u.privileges,u.token,u.device_token,c.firstname,c.lastname,c.username,c.img,c.phone_varified,c.email_varified');
+            $this->db->select('u.id,u.phone,u.email,u.password,u.role_id,u.privileges,u.token,u.device_token,c.firstname,c.lastname,c.username,c.img,c.phone_varified,c.email_varified,c.wallet');
             $this->db->from('users u');
             $this->db->join('customers c','c.customer_id = u.id','left');
             $this->db->where('u.id',$user_id);
@@ -279,6 +279,52 @@
             return $result;
         }
 
+        function add_credit_history($user_id,$amount,$operation_type,$description){
+            $data_add = array();
+            $data_add['user_id'] = $user_id;
+            $data_add['amount'] = $amount;
+            $data_add['operation_type'] = $operation_type;
+            $data_add['description'] = $description;
+            if($this->db->insert('wallet_history',$data_add)){
+                $id = $this->db->insert_id();
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        function add_credit_to_wallet($user_id,$amount){
+            $result = array();
+            $data_customer = array();
+            // $data_customer['wallet'] = "wallet+".(int)$amount."";
+            $this->db->set('wallet', 'wallet+'.(float)$amount, FALSE); 
+            $this->db->where('id',$user_id);
+            if($this->db->update('customers',$data_customer)){
+
+                $operation_type = "credit";
+                $description = "Add credit to wallet by customer";
+                $this->add_credit_history($user_id,$amount,$operation_type,$description);
+
+                $result['status'] = "add";
+            }else{
+                $result['status'] = "not_add";
+            }
+            $result['user'] = $this->get_customer_by_id($user_id);
+            return $result;
+        }
+
+        public function get_customer_wallet($user_id){
+            $result['user'] = $this->get_customer_by_id($user_id);
+
+            $this->db->select('wh.*');
+            $this->db->where('user_id',$user_id);
+            $query = $this->db->get('wallet_history wh');
+            $result['history'] = array();
+            if ($query->num_rows() > 0) {
+                $result['history'] = $query->result();
+            }
+            return $result;
+        }
 
 
 

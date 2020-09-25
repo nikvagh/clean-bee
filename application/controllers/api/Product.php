@@ -15,6 +15,7 @@ class Product extends REST_Controller
     {
         parent::__construct();
         $this->load->model('api/Product_model','product');
+        $this->load->model('api/User_model','user');
 
         $this->load->database();
         // $this->table='users';
@@ -548,6 +549,206 @@ class Product extends REST_Controller
                 $this->response($result, REST_Controller::HTTP_OK);
             }
         }
+    }
+
+    public function place_order_post(){
+        $this->token_check();
+        $_POST = $this->request->body;
+
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'shop_id',
+                'label' => 'shop_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_type',
+                'label' => 'order_type',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pick_location',
+                'label' => 'pick_location',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pickup_date',
+                'label' => 'pickup_date',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pickup_hour',
+                'label' => 'pickup_hour',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pickup_time',
+                'label' => 'pickup_time',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'delivery_date',
+                'label' => 'delivery_date',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'delivery_hour',
+                'label' => 'delivery_hour',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'delivery_time',
+                'label' => 'delivery_time',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pick_lat',
+                'label' => 'pick_lat',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'pick_lng',
+                'label' => 'pick_lng',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'shop_lat',
+                'label' => 'shop_lat',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'shop_lng',
+                'label' => 'shop_lng',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+
+            [
+                'field' => 'payment_name',
+                'label' => 'payment_name',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'payment_email',
+                'label' => 'payment_email',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'payment_address',
+                'label' => 'payment_address',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'payment_type',
+                'label' => 'payment_type',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'payment_token',
+                'label' => 'payment_token',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_amount',
+                'label' => 'order_amount',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'discount',
+                'label' => 'discount',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'delivery_fee',
+                'label' => 'delivery_fee',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'net_amount',
+                'label' => 'net_amount',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'online_payment_commision',
+                'label' => 'online_payment_commision',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'total_amount',
+                'label' => 'total_amount',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+        ];
+
+        // optional
+        // online_payment_commision
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+
+            if($_POST['payment_type'] != "credit_card" && $_POST['payment_type'] != "cash" && $_POST['payment_type'] != "wallet"){
+                $result['status'] = 310;
+                $result['title'] = "Invalid payment_method. payment method must be credit_card,cash,wallet";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            // echo "111";
+            if($this->product->add_order($_POST)){
+                $result['status'] = 200;
+                $result['title'] = "Order placed successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "order placing failed";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+
     }
 
 }
