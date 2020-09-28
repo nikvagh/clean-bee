@@ -751,4 +751,297 @@ class Product extends REST_Controller
 
     }
 
+    public function get_orders_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'tab',
+                'label' => 'tab',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+
+            if($_POST['tab'] != "ongoing" && $_POST['tab'] != "scheduled" && $_POST['tab'] != "history"){
+                $result['status'] = 400;
+                $result['title'] = "Tab values should be ongoing,scheduled or history.";
+                $result['res'] = [];
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            $orders = $this->product->get_orders($_POST['user_id'],$_POST['tab']);
+            $result['status'] = 200;
+            $result['title'] = "Orders list";
+            $result['res'] = $orders;
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }
+    }
+
+    public function cancel_order_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_id',
+                'label' => 'order_id',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            $order_cancel = $this->product->cancel_order($_POST['user_id'],$_POST['order_id']);
+
+            if($order_cancel == "st_update"){
+                $result['status'] = 200;
+                $result['title'] = "Order canceled successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "Order can not be cancel. order status is ".$order_cancel;
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function reorder_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_id',
+                'label' => 'order_id',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+
+            $order_cancel = $this->product->reorder_order($_POST['user_id'],$_POST['order_id']);
+            if($order_cancel){
+                $result['status'] = 200;
+                $result['title'] = "Order Item added to cart successfully";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "Something Wrong... Items added to cart failed";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function get_rating_reason_get(){
+        $this->token_check();
+        $rating_reasons = $this->product->get_rating_reason();
+        
+        $result['status'] = 200;
+        $result['title'] = "Rating reason list";
+        $result['res'] = $rating_reasons;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
+    public function rate_order_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'order_id',
+                'label' => 'order_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'star',
+                'label' => 'star',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+
+            $star_ary = array(0.5,1,1.5,2,2.5,3,3.5,4,4.5,5);
+            if(!in_array($_POST['star'],$star_ary)){
+                $result['status'] = 301;
+                $result['title'] = "Star values must be lessthan 5 and 0.5 figure";
+                $result['res'] = [];
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            if($_POST['star'] <= 3){
+                if(!isset($_POST['reason_id']) && !isset($_POST['comment'])){
+                    $result['status'] = 302;
+                    $result['title'] = "Please Select Review Reason or Enter Comment !!!";
+                    $result['res'] = [];
+                    $this->response($result, REST_Controller::HTTP_OK);
+                }
+            }
+
+            $order_rate = $this->product->rate_order($_POST);
+            if($order_rate == "already"){
+                $result['status'] = 310;
+                $result['title'] = "Order rate already added";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }elseif($order_rate == "insert"){
+                $result['status'] = 200;
+                $result['title'] = "Rating added successfully.";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+    }
+
+    public function service_area_request_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'email',
+                'label' => 'email',
+                'rules' => 'required|callback_chk_valid_email',
+                'errors' => [],
+            ],
+            [
+                'field' => 'phone',
+                'label' => 'phone',
+                'rules' => 'required|numeric',
+                'errors' => [],
+            ],
+            [
+                'field' => 'address',
+                'label' => 'address',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'latitude',
+                'label' => 'latitude',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'longitude',
+                'label' => 'longitude',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($request = $this->product->add_service_area_request($_POST)){
+                $result['status'] = 200;
+                $result['title'] = "Request Added Successfully.";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+
+    public function chk_valid_email()
+    {
+        if(filter_var($this->input->post('email'), FILTER_VALIDATE_EMAIL)){
+            return true;
+        }else{
+            $this->form_validation->set_message('chk_valid_email', 'Enter Valid Email');
+            return false;
+        }
+    }
+
 }

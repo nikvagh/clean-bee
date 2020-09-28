@@ -4,6 +4,7 @@
             parent::__construct();
             // $this->table='users';
             $this->curr_date = date('Y-m-d H:i:s');
+            $this->today_date = date('Y-m-d');
         }
 
         public function get_time_slot(){
@@ -517,7 +518,10 @@
                     $payment_data['commission_amount'] = $commission_amount;
                     $payment_data['created_at'] = $this->curr_date;
                     if($this->db->insert('payments',$payment_data)){
+
+                        $this->remove_from_cart($request['user_id'],'');
                         $success = "Y";
+                    
                     }
 
                 }
@@ -533,6 +537,261 @@
             }
 
         }
+
+        public function get_orderDetails($order_id){
+            $this->db->select('o.id,ur.email as rider_email,s.shop_name,o.order_type,o.pick_location,o.pickup_date,o.pickup_hour,o.pickup_time,o.delivery_date,o.delivery_time,os.status_code,os.status_title,o.order_cost,o.delivery_fee,o.created_at,p.status as payment_status');
+            $this->db->from('orders o');
+            $this->db->join('users ur','ur.id = o.rider_id','left');
+            $this->db->join('shops s','s.id = o.shop_id','left');
+            $this->db->join('order_status os','os.id = o.order_status','left');
+            $this->db->join('payments p','p.order_id = o.id','left');
+            // $this->db->join('order_items oi','oi.order_id = o.id','left');
+            $this->db->where('o.id', $order_id);
+            $query = $this->db->get();
+
+            $result = (object) array();
+            if ($query->num_rows() > 0) {
+                $result = $query->row();
+
+                $this->db->select('oi.id,oi.laundry_id,l.name as lanudry_name,oi.ss_ids');
+                $this->db->from('order_items oi');
+                $this->db->join('laundries l','l.id = oi.laundry_id','left');
+                $this->db->where('oi.order_id', $order_id);
+                $query1 = $this->db->get();
+
+                $result1 = array();
+                if ($query1->num_rows() > 0) {
+                    $result1 = $query1->result();
+
+                    foreach($result1 as $key=>$val){
+                        $services_ids = $val->ss_ids;
+                        $services_ids_ary = explode(",", $services_ids);
+
+                        $this->db->select('GROUP_CONCAT(c.name) as services');
+                        $this->db->from('capabilities c');
+                        $this->db->where_in('c.id', $services_ids_ary);
+                        $query2 = $this->db->get();
+                        
+                        $services_str = "";
+                        if ($query2->num_rows() > 0) {
+                            $result2 = $query2->row();
+                            $services_str = $result2->services;
+                            // print_r($result2);
+                        }
+
+                        $result1[$key]->services = $services_str;
+                        unset($result1[$key]->ss_ids);
+
+                    }
+
+                }
+                // echo $this->db->last_query();
+                // print_r($result);
+                // exit;
+
+                $result->items = $result1;
+
+            }
+            return $result;
+        }
+
+        public function get_todays_orders($user_id){
+            $this->db->select('o.id');
+            $this->db->from('orders o');
+            $this->db->where('o.user_id', $user_id);
+            // $this->db->where('o.created_at', $this->today_date);
+            $this->db->where('CAST(o.created_at As Date) = "'.$this->today_date.'"');
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+
+            $result = array();
+            if ($query->num_rows() > 0) {
+                $orders_list = $query->result();
+
+                foreach($orders_list as $key=>$val){
+                    $result[] = $this->get_orderDetails($val->id);
+                }
+
+            }
+            return $result;
+        }
+
+        public function get_orders($user_id,$tab){
+            $this->db->select('o.id');
+            $this->db->from('orders o');
+            $this->db->where('o.user_id', $user_id);
+            // $this->db->join('order_status os','os.id = o.order_status','left');
+            // $this->db->where('CAST(o.created_at As Date) = "'.$this->today_date.'"');
+            
+            if($tab == "ongoing"){
+                $this->db->where('o.order_status >=', 3);
+                $this->db->where('o.order_status <=', 10);
+            }
+            if($tab == "scheduled"){
+                $this->db->where('o.order_status', 1);
+            }
+            if($tab == "history"){
+                $this->db->where('o.order_status >=', 11);
+            }
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+
+            $result = array();
+            if ($query->num_rows() > 0) {
+                $orders_list = $query->result();
+
+                foreach($orders_list as $key=>$val){
+                    $result[] = $this->get_orderDetails($val->id);
+                }
+
+            }
+            return $result;
+        }
+
+        public function cancel_order($user_id,$order_id){
+            $this->db->select('o.id,o.order_status,os.status_title');
+            $this->db->from('orders o');
+            $this->db->where('o.id',$order_id);
+            $this->db->join('order_status os','os.id = o.order_status','left');
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+
+            $result = "";
+            if ($query->num_rows() > 0) {
+
+                $orders = $query->row();
+                if($orders->order_status <= 2){
+
+                    $order_data = array();
+                    $order_data['order_status'] = 12;
+                    $this->db->where('id',$order_id);
+                    if($this->db->update('orders',$order_data)){
+                        $result = "st_update";
+                    }
+
+                }else{
+                    $result = $orders->status_title;
+                }
+
+            }
+            return $result;
+        }
+
+        public function get_laundry_by_id(){
+
+        }
+
+        public function reorder_order($user_id,$order_id){
+
+            $this->remove_from_cart($user_id,'');
+
+            $this->db->select('oi.*,o.order_status,o.user_id,o.order_type');
+            $this->db->from('order_items oi');
+            $this->db->where('oi.order_id',$order_id);
+            // $this->db->join('order_status os','os.id = o.order_status','left');
+            $this->db->join('orders o','o.id = oi.order_id','left');
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+
+            $added_cart_cnt = 0;
+            if ($query->num_rows() > 0) {
+
+                $order_items = $query->result();
+                // print_r($order_items);
+                // exit;
+
+                foreach($order_items as $key => $val){
+                    $cart_data = array();
+                    $cart_data['user_id'] = $val->user_id;
+                    $cart_data['laundry_id'] = $val->laundry_id;
+                    $cart_data['qty'] = $val->qty;
+                    $cart_data['order_type'] = $val->order_type;
+                    $cart_data['services'] = explode(',',$val->ss_ids);
+
+                    if($this->add_to_cart($cart_data)){
+                        $added_cart_cnt++;
+                    }
+                }
+
+            }
+
+            if($added_cart_cnt > 0){
+                return true;
+            }else{
+                return false;
+            }
+
+        }
+
+        public function rate_order($request){
+            // print_r($request);
+            // exit;
+
+            $this->db->select('or.*');
+            $this->db->from('order_rating or');
+            $this->db->where('or.order_id',$request['order_id']);
+            $query = $this->db->get();
+
+            $res_status = "";
+            if ($query->num_rows() > 0) {
+                $res_status = "already";
+            }else{
+                $rate_data = array();
+                $rate_data['order_id'] = $request['order_id'];
+                $rate_data['star'] = $request['star'];
+                if($rate_data['star'] <= 3){
+                    $rate_data['reason_id'] = $request['reason_id'];
+                }
+                if($rate_data['star'] <= 3){
+                    $rate_data['comment'] = $request['comment'];
+                }
+                $rate_data['created_at'] = $this->curr_date;
+                if($this->db->insert('order_rating',$rate_data)){
+                    $res_status = "insert";
+                }
+            }
+
+            return $res_status;
+
+        }
+
+        public function get_rating_reason(){
+            $this->db->select('rr.*');
+            $this->db->from('review_reasons rr');
+            $query = $this->db->get();
+
+            $result = array();
+            if($query->num_rows() > 0){
+                $result = $query->result();
+            }
+            return $result;
+        }
+
+
+        public function add_service_area_request($request){
+
+            $service_data = array();
+            $service_data['email'] = $request['email'];
+            $service_data['phone'] = $request['phone'];
+            $service_data['address'] = $request['address'];
+            $service_data['latitude'] = $request['latitude'];
+            $service_data['longitude'] = $request['longitude'];
+            if($this->db->insert('service_area_request',$service_data)){
+                return true;
+            }else{
+                return false;
+            }
+
+        }
+        
         
     }
 ?>

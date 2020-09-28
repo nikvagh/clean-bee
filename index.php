@@ -1,6 +1,8 @@
 <?php
-
+// echo date('y-m-d H:i:s');
 date_default_timezone_set('Asia/Qatar');
+// echo "<br/>";
+// echo date('y-m-d H:i:s');
 /**
  * CodeIgniter
  *

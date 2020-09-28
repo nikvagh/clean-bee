@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 25, 2020 at 02:07 PM
+-- Generation Time: Sep 28, 2020 at 02:25 PM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -94,15 +94,15 @@ CREATE TABLE IF NOT EXISTS `cart` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `cart`
 --
 
 INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `price_total`, `removed`, `created_at`, `updated_at`) VALUES
-(10, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-24 16:00:05', '2020-09-24 15:00:54'),
-(11, 1, 1, 8, '2,1', 30.00, 240.00, 'N', '2020-09-24 16:05:37', '2020-09-25 10:25:13');
+(15, 1, 1, 8, '2,1', 30.00, 240.00, 'N', '2020-09-28 18:47:52', '2020-09-28 18:47:52'),
+(14, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-28 18:47:52', '2020-09-28 18:47:52');
 
 -- --------------------------------------------------------
 
@@ -302,6 +302,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pickup_date` date NOT NULL,
   `pickup_hour` varchar(10) NOT NULL,
   `pickup_time` varchar(10) NOT NULL,
+  `drop_location` text NOT NULL,
   `delivery_date` date NOT NULL,
   `delivery_hour` varchar(10) NOT NULL,
   `delivery_time` varchar(10) NOT NULL,
@@ -312,20 +313,22 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pick_lng` varchar(50) NOT NULL,
   `shop_lat` varchar(50) NOT NULL,
   `shop_lng` varchar(50) NOT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `rider_id`, `shop_id`, `order_type`, `pick_location`, `pickup_date`, `pickup_hour`, `pickup_time`, `delivery_date`, `delivery_hour`, `delivery_time`, `order_status`, `order_cost`, `delivery_fee`, `pick_lat`, `pick_lng`, `shop_lat`, `shop_lng`, `created_at`, `updated_at`) VALUES
-(1, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 16:58:57', '0000-00-00 00:00:00'),
-(2, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:46', '0000-00-00 00:00:00'),
-(3, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:54', '0000-00-00 00:00:00'),
-(4, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:01:04', '0000-00-00 00:00:00');
+INSERT INTO `orders` (`id`, `user_id`, `rider_id`, `shop_id`, `order_type`, `pick_location`, `pickup_date`, `pickup_hour`, `pickup_time`, `drop_location`, `delivery_date`, `delivery_hour`, `delivery_time`, `order_status`, `order_cost`, `delivery_fee`, `pick_lat`, `pick_lng`, `shop_lat`, `shop_lng`, `created_at`, `updated_at`) VALUES
+(1, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 16:58:57', '2020-09-25 16:58:57'),
+(2, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 12, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:46', '2020-09-25 17:00:46'),
+(3, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:54', '2020-09-25 17:00:54'),
+(4, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:01:04', NULL),
+(5, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 12:43:51', NULL),
+(6, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 16:16:15', NULL);
 
 -- --------------------------------------------------------
 
@@ -360,7 +363,7 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   `price` double(20,2) NOT NULL,
   `price_total` double(20,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `order_items`
@@ -376,7 +379,36 @@ INSERT INTO `order_items` (`id`, `order_id`, `laundry_id`, `qty`, `ss_ids`, `pri
 (7, 3, 2, 3, '1', 10.00, 30.00),
 (8, 3, 1, 8, '2,1', 30.00, 240.00),
 (9, 4, 2, 3, '1', 10.00, 30.00),
-(10, 4, 1, 8, '2,1', 30.00, 240.00);
+(10, 4, 1, 8, '2,1', 30.00, 240.00),
+(11, 5, 2, 3, '1', 10.00, 30.00),
+(12, 5, 1, 8, '2,1', 30.00, 240.00),
+(13, 6, 2, 9, '1', 10.00, 90.00),
+(14, 6, 1, 24, '2,1', 30.00, 720.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_rating`
+--
+
+DROP TABLE IF EXISTS `order_rating`;
+CREATE TABLE IF NOT EXISTS `order_rating` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `star` float NOT NULL,
+  `reason_id` int(11) NOT NULL,
+  `comment` text NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `order_rating`
+--
+
+INSERT INTO `order_rating` (`id`, `order_id`, `star`, `reason_id`, `comment`, `created_at`, `updated_at`) VALUES
+(1, 2, 5, 0, '', '2020-09-28 17:07:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -467,14 +499,16 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `payments`
 --
 
 INSERT INTO `payments` (`id`, `order_id`, `shop_id`, `payment_token`, `fill_name`, `total_amount`, `net_amount`, `paypal_fee`, `email`, `payment_type`, `date_received`, `address`, `status`, `order_amount`, `discount`, `delivery_fee`, `online_payment_commision`, `payable_amount_to_shop`, `commission_amount`, `created_at`, `updated_at`) VALUES
-(1, 4, 1, 'token', 'nik test@gmail.com', 45.00, 45.00, 0.00, 'test@gmail.com', 'credit_card', '2020-09-25 17:01:04', 'testt test', 'paid', 40.00, 0.00, 5.00, 0.00, 42.75, 2.25, '2020-09-25 17:01:04', '2020-09-25 19:31:04');
+(1, 4, 1, 'token', 'nik test@gmail.com', 45.00, 45.00, 0.00, 'test@gmail.com', 'credit_card', '2020-09-25 17:01:04', 'testt test', 'paid', 40.00, 0.00, 5.00, 0.00, 42.75, 2.25, '2020-09-25 17:01:04', '2020-09-25 19:31:04'),
+(2, 5, 1, 'token', 'nik test@gmail.com', 45.00, 45.00, 0.00, 'test@gmail.com', 'credit_card', '2020-09-28 12:43:51', 'testt test', 'paid', 40.00, 0.00, 5.00, 0.00, 42.75, 2.25, '2020-09-28 12:43:51', '2020-09-28 15:13:51'),
+(3, 6, 1, 'token', 'nik test@gmail.com', 45.00, 45.00, 0.00, 'test@gmail.com', 'credit_card', '2020-09-28 16:16:15', 'testt test', 'paid', 40.00, 0.00, 5.00, 0.00, 42.75, 2.25, '2020-09-28 16:16:15', '2020-09-28 18:46:15');
 
 -- --------------------------------------------------------
 
@@ -499,6 +533,27 @@ CREATE TABLE IF NOT EXISTS `products` (
 INSERT INTO `products` (`id`, `name`, `price`, `created_at`, `updated_at`) VALUES
 (17, 'dsfdsf', 152, '2020-09-16 04:58:27', NULL),
 (18, 'dd', 125, '2020-09-16 04:58:27', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `review_reasons`
+--
+
+DROP TABLE IF EXISTS `review_reasons`;
+CREATE TABLE IF NOT EXISTS `review_reasons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `review_reasons`
+--
+
+INSERT INTO `review_reasons` (`id`, `description`) VALUES
+(1, 'bad service'),
+(2, 'bad service 1');
 
 -- --------------------------------------------------------
 
@@ -573,7 +628,15 @@ CREATE TABLE IF NOT EXISTS `service_area_request` (
   `latitude` varchar(50) NOT NULL,
   `longitude` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `service_area_request`
+--
+
+INSERT INTO `service_area_request` (`id`, `email`, `phone`, `address`, `latitude`, `longitude`) VALUES
+(1, 'test@gmail.com', '123456789', '3, main tst dgtessjd,s', '25.225452', '24.121522'),
+(2, 'test@gmail.com', '123456789', '3, main tst dgtessjd,s', '25.225452', '24.121522');
 
 -- --------------------------------------------------------
 
