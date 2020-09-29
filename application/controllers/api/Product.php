@@ -947,7 +947,7 @@ class Product extends REST_Controller
             if(!in_array($_POST['star'],$star_ary)){
                 $result['status'] = 301;
                 $result['title'] = "Star values must be lessthan 5 and 0.5 figure";
-                $result['res'] = [];
+                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
@@ -955,7 +955,7 @@ class Product extends REST_Controller
                 if(!isset($_POST['reason_id']) && !isset($_POST['comment'])){
                     $result['status'] = 302;
                     $result['title'] = "Please Select Review Reason or Enter Comment !!!";
-                    $result['res'] = [];
+                    $result['res'] = (object) array();
                     $this->response($result, REST_Controller::HTTP_OK);
                 }
             }

@@ -96,10 +96,28 @@
         public function get_total_new_notification_by_user_id($user_id){
             $this->db->select('count(n.id) as total');
             $this->db->from('notifications n');
+            $this->db->where('n.is_new','true');
             $this->db->where('n.user_id',$user_id);
             $query = $this->db->get();
-            return $query->num_rows();
+            // echo $this->db->last_query();
+            // return $query->num_rows();
+            return $query->row('total');
         }
+
+        public function change_notification_to_viewed($notifications_id){
+            $data_noti = array(
+                'is_new'=>'false',
+                'updated_at'=>$this->curr_date
+            );
+            $this->db->where('id',$notifications_id);
+            if($this->db->update('notifications',$data_noti)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
+        
 
         public function update_email($user_id,$email){
             $success = "N";

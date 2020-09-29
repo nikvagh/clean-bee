@@ -79,6 +79,13 @@ class User extends REST_Controller
                     ],
 
             ],
+            // [
+            //     'field' => 'login_provider',
+            //     'label' => 'login_provider',
+            //     'rules' => 'required',
+            //     'errors' => [],
+            // ],
+            
 
         ];
 
@@ -97,6 +104,13 @@ class User extends REST_Controller
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
+
+            // if($_POST['login_provider'] != 'normal' && $_POST['login_provider'] != 'google' && $_POST['login_provider'] != 'fb' && $_POST['login_provider'] != 'apple_id'){
+            //     $result['status'] = 400;
+            //     $result['title'] = 'Enter valid login_provider. it can be normal,google,fb,apple_id';
+            //     $result['res'] = (object) array();
+            //     $this->response($result, REST_Controller::HTTP_OK);
+            // }
 
             // sent otp
             $otp = "1234";
@@ -186,6 +200,12 @@ class User extends REST_Controller
                     'rules' => 'required',
                     'errors' => [],
             ],
+            // [
+            //     'field' => 'login_provider',
+            //     'label' => 'login_provider',
+            //     'rules' => 'required',
+            //     'errors' => [],
+            // ],
 
         ];
 
@@ -387,6 +407,50 @@ class User extends REST_Controller
         $result['res']['total_new'] = $total_new;
         $result['res']['notification'] = $notifications;
         $this->response($result, REST_Controller::HTTP_OK);
+    }
+
+    public function notification_to_viewed_post(){
+        $this->token_check();
+
+        $config = [
+            // [
+            //         'field' => 'user_id',
+            //         'label' => 'user_id',
+            //         'rules' => 'required',
+            //         'errors' => [],
+            // ],
+            [
+                    'field' => 'notification_id',
+                    'label' => 'notification_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($this->user->change_notification_to_viewed($_POST['notification_id'])){
+                $result['status'] = 200;
+                $result['title'] = "Notification status changed to viewed";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
     }
 
     public function update_email_post(){

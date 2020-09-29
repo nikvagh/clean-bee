@@ -539,12 +539,17 @@
         }
 
         public function get_orderDetails($order_id){
-            $this->db->select('o.id,ur.email as rider_email,s.shop_name,o.order_type,o.pick_location,o.pickup_date,o.pickup_hour,o.pickup_time,o.delivery_date,o.delivery_time,os.status_code,os.status_title,o.order_cost,o.delivery_fee,o.created_at,p.status as payment_status');
+            $this->db->select('o.id,ur.email as rider_email,s.shop_name,o.order_type,o.pick_location,o.pickup_date,o.pickup_hour,o.pickup_time,o.delivery_date,o.delivery_time,os.status_code,os.status_title,o.order_cost,o.delivery_fee,o.created_at,
+                                p.payment_type,p.status as payment_status,
+                                c.firstname as user_firstname,c.lastname as user_lastname,uc.phone as user_phone,uc.email as user_email,c.address as user_address
+                            ');
             $this->db->from('orders o');
             $this->db->join('users ur','ur.id = o.rider_id','left');
             $this->db->join('shops s','s.id = o.shop_id','left');
             $this->db->join('order_status os','os.id = o.order_status','left');
             $this->db->join('payments p','p.order_id = o.id','left');
+            $this->db->join('users uc','uc.id = o.user_id','left');
+            $this->db->join('customers c','c.customer_id = uc.id','left');
             // $this->db->join('order_items oi','oi.order_id = o.id','left');
             $this->db->where('o.id', $order_id);
             $query = $this->db->get();
@@ -581,7 +586,6 @@
 
                         $result1[$key]->services = $services_str;
                         unset($result1[$key]->ss_ids);
-
                     }
 
                 }
@@ -750,7 +754,7 @@
                 if($rate_data['star'] <= 3){
                     $rate_data['reason_id'] = $request['reason_id'];
                 }
-                if($rate_data['star'] <= 3){
+                if($rate_data['star'] <= 3 && isset($request['comment'])){
                     $rate_data['comment'] = $request['comment'];
                 }
                 $rate_data['created_at'] = $this->curr_date;
@@ -791,6 +795,87 @@
             }
 
         }
+
+
+
+        // =========================== for rider 
+
+        public function get_assigned_order_to_rider($rider_id,$tab,$filter){
+            $this->db->select('o.id');
+            $this->db->from('orders o');
+            $this->db->where('o.rider_id', $rider_id);
+            if($tab == "history"){
+                $this->db->where('o.order_status >=', 11);
+            }
+
+            if(isset($filter) && $filter != ""){
+                $this->db->join('shops s','s.id = o.shop_id','left');
+                $this->db->join('users u','u.id = o.user_id','left');
+                $this->db->join('order_items oi','oi.id = o.id','left');
+                $this->db->join('laundries l','l.id = oi.laundry_id','left');
+                $this->db->join('capabilities c','find_in_set(c.id,oi.ss_ids) > 0','left');
+                $this->db->where('( 
+                                    (s.shop_name like "%'.$filter.'%") OR 
+                                    (u.phone like "%'.$filter.'%") OR 
+                                    (u.email like "%'.$filter.'%") OR 
+                                    (l.name like "%'.$filter.'%") OR 
+                                    (c.name like "%'.$filter.'%") 
+                                )');
+                // $this->db->where('o.order_status >=', 11);
+            }
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+
+            $result = array();
+            if ($query->num_rows() > 0) {
+                $orders_list = $query->result();
+
+                foreach($orders_list as $key=>$val){
+                    $result[] = $this->get_orderDetails($val->id);
+                }
+
+            }
+            return $result;
+        }
+
+        public function start_order($order_id){
+            $this->db->select('o.id');
+            $this->db->from('orders o');
+            $this->db->where('o.id', $order_id);
+            $this->db->where('o.pickup_date', $this->today_date);
+            
+            $query = $this->db->get();
+
+            // echo $this->db->last_query();
+            // exit;
+            $success = "";
+            if ($query->num_rows() > 0) {
+                $order = $query->row();
+
+                $order_data = array();
+                $order_data['order_status'] = 3;
+                $order_data['updated_at'] = $this->curr_date;
+
+                $this->db->where('id',$order->id);
+                if($this->db->update('orders',$order_data)){
+                    // echo $this->db->last_query();
+                    // exit;
+                    $success = "Y";
+                }
+            }else{
+                $success = "N";
+            }
+
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        
+
         
         
     }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 28, 2020 at 02:25 PM
+-- Generation Time: Sep 29, 2020 at 02:31 PM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -161,6 +161,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `confirmed_at` datetime DEFAULT NULL,
   `refer_from` int(11) NOT NULL,
   `wallet` double(20,2) NOT NULL,
+  `login_provider` enum('normal','google','fb','apple_id') NOT NULL DEFAULT 'normal' COMMENT 'normal,google,fb,apple_id',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
@@ -168,9 +169,9 @@ CREATE TABLE IF NOT EXISTS `customers` (
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`) VALUES
-(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00),
-(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL, 0, 0.00);
+INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`, `login_provider`) VALUES
+(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00, 'normal'),
+(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL, 0, 0.00, 'normal');
 
 -- --------------------------------------------------------
 
@@ -275,15 +276,16 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `notifications`
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_new`, `created_at`, `updated_at`) VALUES
-(1, 2, 'tset tet s', 'messg', 'false', '2020-09-18 17:17:03', '2020-09-18 17:17:03'),
-(2, 2, 'test title 2', 'msg 2', 'true', '2020-09-18 17:17:03', '2020-09-18 17:17:03');
+(1, 2, 'tset tet s', 'messg', 'false', '2020-09-18 17:17:03', '2020-09-29 15:21:31'),
+(2, 2, 'test title 2', 'msg 2', 'false', '2020-09-18 17:17:03', '2020-09-29 15:23:29'),
+(3, 4, 'test title 2', 'msg 2', 'false', '2020-09-18 17:17:03', '2020-09-29 15:23:36');
 
 -- --------------------------------------------------------
 
@@ -327,8 +329,8 @@ INSERT INTO `orders` (`id`, `user_id`, `rider_id`, `shop_id`, `order_type`, `pic
 (2, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 12, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:46', '2020-09-25 17:00:46'),
 (3, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:00:54', '2020-09-25 17:00:54'),
 (4, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-25 17:01:04', NULL),
-(5, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 12:43:51', NULL),
-(6, 1, 0, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 16:16:15', NULL);
+(5, 1, 1, 1, 'standard', '10. western view. apt.', '2020-10-12', '20', '30', '', '2020-10-15', '15', '06', 1, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 12:43:51', NULL),
+(6, 1, 1, 1, 'standard', '10. western view. apt.', '2020-09-29', '20', '30', '', '2020-10-15', '15', '06', 3, 45.00, 5.00, '22.02151', '52.02151', '52.02151', '52.15525', '2020-09-28 16:16:15', '2020-09-29 16:42:46');
 
 -- --------------------------------------------------------
 
@@ -401,14 +403,16 @@ CREATE TABLE IF NOT EXISTS `order_rating` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `order_rating`
 --
 
 INSERT INTO `order_rating` (`id`, `order_id`, `star`, `reason_id`, `comment`, `created_at`, `updated_at`) VALUES
-(1, 2, 5, 0, '', '2020-09-28 17:07:52', NULL);
+(1, 2, 5, 0, '', '2020-09-28 17:07:52', NULL),
+(2, 1, 2, 1, 'tets', '2020-09-29 07:51:16', NULL),
+(3, 3, 2, 1, '', '2020-09-29 07:52:31', NULL);
 
 -- --------------------------------------------------------
 
@@ -458,7 +462,7 @@ CREATE TABLE IF NOT EXISTS `otps` (
   `phone` varchar(50) NOT NULL,
   `otp` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `otps`
@@ -467,7 +471,9 @@ CREATE TABLE IF NOT EXISTS `otps` (
 INSERT INTO `otps` (`id`, `phone`, `otp`) VALUES
 (7, '123456', '1234'),
 (4, '1234567', '1234'),
-(6, '1234562', '1234');
+(6, '1234562', '1234'),
+(11, '1234567898', '1234'),
+(14, '1234567899', '1234');
 
 -- --------------------------------------------------------
 
@@ -565,10 +571,22 @@ DROP TABLE IF EXISTS `riders`;
 CREATE TABLE IF NOT EXISTS `riders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `rider_id` int(11) NOT NULL,
+  `firstname` varchar(100) NOT NULL,
+  `lastname` varchar(100) NOT NULL,
+  `img` text NOT NULL,
   `address` text NOT NULL,
   `ride_type` enum('car','bike') NOT NULL COMMENT 'car,bike',
+  `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false	',
+  `email_varified` enum('true','false') NOT NULL DEFAULT 'false' COMMENT 'true,false	',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `riders`
+--
+
+INSERT INTO `riders` (`id`, `rider_id`, `firstname`, `lastname`, `img`, `address`, `ride_type`, `phone_varified`, `email_varified`) VALUES
+(1, 4, 'nik rider', 'nik rider', '1601376833_6883_QR-G-RW-23.jpg', 'addresss test rider', 'bike', 'true', 'true');
 
 -- --------------------------------------------------------
 
@@ -628,7 +646,7 @@ CREATE TABLE IF NOT EXISTS `service_area_request` (
   `latitude` varchar(50) NOT NULL,
   `longitude` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `service_area_request`
@@ -636,7 +654,9 @@ CREATE TABLE IF NOT EXISTS `service_area_request` (
 
 INSERT INTO `service_area_request` (`id`, `email`, `phone`, `address`, `latitude`, `longitude`) VALUES
 (1, 'test@gmail.com', '123456789', '3, main tst dgtessjd,s', '25.225452', '24.121522'),
-(2, 'test@gmail.com', '123456789', '3, main tst dgtessjd,s', '25.225452', '24.121522');
+(2, 'test@gmail.com', '123456789', '3, main tst dgtessjd,s', '25.225452', '24.121522'),
+(3, 'test123@gmail.com', '12563412', 'test address', '25.3651', '25.1452'),
+(4, 'test123@gmail.com', '12563412', 'test address', '25.3651', '25.1452');
 
 -- --------------------------------------------------------
 
@@ -804,16 +824,17 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `created_at`, `updated_at`) VALUES
-(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'gKsfTk83zwtMDa2PncYi', '123456', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
-(2, '123456', 'nikul111@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
-(3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48');
+(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'gKsfTk83zwtMDa2PncYi', '', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul222@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
+(3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
+(4, '1234567899', 'rider@gmail.com', '123456', 4, '', 'CJFHEATdvs2MpG0PS8ai', '123456', 'Enable', '2020-09-17 12:09:50', '2020-09-29 14:13:00');
 
 -- --------------------------------------------------------
 

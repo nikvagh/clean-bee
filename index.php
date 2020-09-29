@@ -348,6 +348,7 @@ define('ADMINPATH', 'admin/');
 
 define('UPLOADS', 'uploads/');
 define('CUSTOMER_PRO', UPLOADS.'customer_profile/');
+define('RIDER_PRO', UPLOADS.'rider_profile/');
 define('ADBNR_PATH', UPLOADS.'ad_banner/');
 define('LAUNDRY_IMG_PATH', UPLOADS.'laundry/');
 define('CAPABILITY_IMG_PATH', UPLOADS.'capabilities/');
