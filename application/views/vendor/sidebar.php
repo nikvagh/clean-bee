@@ -213,16 +213,6 @@
         </li>
       <?php } ?>
 
-      <?php if ($this->accessibility->check_access1('ad')) { ?>
-        <li class="<?php if ($page_selected == 'ad') { echo 'active'; } ?>">
-          <a href="<?php echo base_url() . ADMINPATH; ?>ad">
-            <!-- <i class="fa fa-gear"></i>  -->
-            <img src="<?php echo $this->back_assets . 'dist/img/icons/Settings.png'; ?>" width="20px" /> &nbsp;
-            <span>Ad. Banners</span>
-          </a>
-        </li>
-      <?php } ?>
-
       <!-- <li class="">
           <a data-target="#print_modal" data-toggle="modal" style="cursor: pointer;">
             <img src="<?php echo $this->back_assets . 'dist/img/icons/Advertisment.png'; ?>" width="20px" /> &nbsp;

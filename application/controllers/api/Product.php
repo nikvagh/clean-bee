@@ -506,6 +506,39 @@ class Product extends REST_Controller
         }
     }
 
+    public function get_dicsount_codes_post(){
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'vendor_id',
+                'label' => 'vendor_id',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            $discounts = $this->product->get_discount($_POST['vendor_id']);
+            $result['status'] = 200;
+            $result['title'] = "Discount list";
+            $result['res'] = $discounts;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
     public function check_discount_code_post(){
         $this->token_check();
         $config = [

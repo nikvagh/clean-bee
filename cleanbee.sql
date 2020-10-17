@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 29, 2020 at 02:31 PM
+-- Generation Time: Oct 17, 2020 at 01:57 PM
 -- Server version: 5.7.31
 -- PHP Version: 7.3.21
 
@@ -30,20 +30,26 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `ads`;
 CREATE TABLE IF NOT EXISTS `ads` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` text NOT NULL,
-  `img` text NOT NULL,
+  `title` mediumtext NOT NULL,
+  `img` mediumtext NOT NULL,
+  `target` mediumtext NOT NULL,
   `status` enum('Enable','Disable') NOT NULL DEFAULT 'Enable',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `ads`
 --
 
-INSERT INTO `ads` (`id`, `title`, `img`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'test test', '', 'Enable', '2020-09-18 17:00:40', '2020-09-18 17:00:40');
+INSERT INTO `ads` (`id`, `title`, `img`, `target`, `status`, `created_at`, `updated_at`) VALUES
+(12, 's', '1602506515_00427_HD.JPG', 'www.ghfghfgh', 'Enable', '2020-10-12 12:41:55', '2020-10-12 18:11:55'),
+(11, 'dsfdsf', '1602506504_5986_MC-G-TY-129.jpg', 'www.ghfghfgh', 'Enable', '2020-10-12 12:41:44', '2020-10-12 18:11:44'),
+(5, 'dsfdsf', '1602510386_5908_MC-G-FJ-606.jpg', 'www.fhfhfgh.fg', 'Disable', '2020-10-12 05:21:11', '2020-10-12 01:46:26'),
+(10, 'dfg', '1602503648_4286.JPG', 'www.ghfgh', 'Disable', '2020-10-12 11:54:08', '2020-10-12 17:24:08'),
+(13, 'artre', '1602507944_14768_CG-G-DC-105.jpg', 'http://ghfghfgh', 'Enable', '2020-10-12 13:05:44', '2020-10-12 18:35:44'),
+(14, 'test tset', '1602511014_6312_MC-G-RW-396.jpg', 'http://ghfghfgh', 'Enable', '2020-10-12 13:56:54', '2020-10-12 19:26:54');
 
 -- --------------------------------------------------------
 
@@ -57,18 +63,18 @@ CREATE TABLE IF NOT EXISTS `capabilities` (
   `name` varchar(200) NOT NULL,
   `arabic_name` varchar(200) NOT NULL,
   `laundry_id` int(11) NOT NULL,
-  `image` text NOT NULL,
+  `image` mediumtext NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `capabilities`
 --
 
 INSERT INTO `capabilities` (`id`, `name`, `arabic_name`, `laundry_id`, `image`, `created_at`, `updated_at`) VALUES
-(1, 'Iron', 'Iron', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
+(1, 'Iron', 'كوي', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
 (2, 'Wash & Iron', 'Wash & Iron', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
 (3, 'Dry clean', 'Dry clean', 1, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
 (4, 'Iron', 'Iron', 2, '', '2020-09-22 00:00:00', '2020-09-22 00:00:00'),
@@ -87,14 +93,14 @@ CREATE TABLE IF NOT EXISTS `cart` (
   `user_id` int(11) NOT NULL,
   `laundry_id` int(11) NOT NULL,
   `qty` int(11) NOT NULL,
-  `ss_ids` text NOT NULL,
+  `ss_ids` mediumtext NOT NULL,
   `price` double(20,2) NOT NULL,
   `price_total` double(20,2) NOT NULL,
   `removed` enum('Y','N') NOT NULL DEFAULT 'N' COMMENT 'Y,N',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `cart`
@@ -113,13 +119,13 @@ INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `pr
 DROP TABLE IF EXISTS `contents`;
 CREATE TABLE IF NOT EXISTS `contents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `content` text NOT NULL,
+  `content` mediumtext NOT NULL,
   `page_type` varchar(100) NOT NULL,
   `language` varchar(100) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -132,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `currency` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `currency_name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `currency`
@@ -154,24 +160,28 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `firstname` varchar(150) NOT NULL,
   `lastname` varchar(150) NOT NULL,
   `username` varchar(100) NOT NULL,
-  `img` text NOT NULL,
-  `address` text NOT NULL,
+  `img` mediumtext NOT NULL,
+  `address` mediumtext NOT NULL,
   `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false',
   `email_varified` enum('true','false') NOT NULL DEFAULT 'false',
   `confirmed_at` datetime DEFAULT NULL,
   `refer_from` int(11) NOT NULL,
   `wallet` double(20,2) NOT NULL,
   `login_provider` enum('normal','google','fb','apple_id') NOT NULL DEFAULT 'normal' COMMENT 'normal,google,fb,apple_id',
+  `provider_token` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`, `login_provider`) VALUES
-(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00, 'normal'),
-(2, 2, 'nikul2', 'vag', 'username1', '1600427387_5986_MC-G-TY-129.jpg', 'username1', 'true', 'false', NULL, 0, 0.00, 'normal');
+INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`, `login_provider`, `provider_token`) VALUES
+(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00, 'normal', ''),
+(2, 2, 'nikul2', 'vag', 'username1', '1601470906_4286.JPG', 'username1', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
+(3, 6, 'nikul', 'kartum', 'nikul', '', '', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
+(4, 7, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss'),
+(5, 8, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss1');
 
 -- --------------------------------------------------------
 
@@ -189,11 +199,11 @@ CREATE TABLE IF NOT EXISTS `discounts` (
   `applied_to` enum('1','2','3') NOT NULL COMMENT '1=sub_total,\r\n2=grand_total,\r\n3=delivery_fee',
   `send_push_notification` enum('Y','N') NOT NULL,
   `expiry_date` datetime DEFAULT NULL,
-  `vendors` text NOT NULL,
+  `vendors` mediumtext NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `discounts`
@@ -201,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `discounts` (
 
 INSERT INTO `discounts` (`id`, `name`, `discount_type`, `percentage`, `value`, `applied_to`, `send_push_notification`, `expiry_date`, `vendors`, `created_at`, `updated_at`) VALUES
 (1, 'test10', 'percentage', '10', 0.00, '2', 'Y', '2020-09-07 19:25:36', '1,9', '2020-09-24 19:14:41', '2020-09-24 19:14:41'),
-(2, 'test20', 'value', '0', 20.00, '1', 'N', '2020-09-26 19:25:55', '5,3,2,3', '2020-09-24 19:14:41', '2020-09-24 19:14:41');
+(2, 'test20', 'value', '0', 20.00, '1', 'N', '2020-10-13 19:25:55', '5,3,2,3,9', '2020-09-24 19:14:41', '2020-09-24 19:14:41');
 
 -- --------------------------------------------------------
 
@@ -216,49 +226,50 @@ CREATE TABLE IF NOT EXISTS `laundries` (
   `arabic_name` varchar(200) NOT NULL,
   `does_require_car` enum('Y','N') NOT NULL,
   `sort_order` int(11) NOT NULL,
-  `image` text NOT NULL,
+  `image` mediumtext NOT NULL,
+  `specification` mediumtext NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `laundries`
 --
 
-INSERT INTO `laundries` (`id`, `name`, `arabic_name`, `does_require_car`, `sort_order`, `image`, `created_at`, `updated_at`) VALUES
-(1, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(2, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(3, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(4, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(5, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(6, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(7, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(8, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(9, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(10, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(11, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(12, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(13, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(14, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(15, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(16, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(17, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(18, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(19, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(20, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(21, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(22, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(23, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(24, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(25, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(26, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(27, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(28, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(29, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(30, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(31, 'thobe', '', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
-(32, 'wool thobe', 'wool thobe', 'N', 0, '', '2020-09-18 00:00:00', '2020-09-18 00:00:00');
+INSERT INTO `laundries` (`id`, `name`, `arabic_name`, `does_require_car`, `sort_order`, `image`, `specification`, `created_at`, `updated_at`) VALUES
+(1, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(2, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(3, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(4, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(5, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(6, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(7, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(8, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(9, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(10, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(11, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(12, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(13, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(14, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(15, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(16, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(17, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(18, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(19, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(20, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(21, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(22, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(23, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(24, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(25, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(26, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(27, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(28, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(29, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(30, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(31, 'thobe', '', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00'),
+(32, 'wool thobe', 'wool thobe', 'N', 0, '', '', '2020-09-18 00:00:00', '2020-09-18 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -270,13 +281,13 @@ DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `title` text NOT NULL,
-  `message` text NOT NULL,
+  `title` mediumtext NOT NULL,
+  `message` mediumtext NOT NULL,
   `is_new` enum('true','false') NOT NULL DEFAULT 'true' COMMENT 'true,false',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `notifications`
@@ -304,7 +315,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `pickup_date` date NOT NULL,
   `pickup_hour` varchar(10) NOT NULL,
   `pickup_time` varchar(10) NOT NULL,
-  `drop_location` text NOT NULL,
+  `drop_location` mediumtext NOT NULL,
   `delivery_date` date NOT NULL,
   `delivery_hour` varchar(10) NOT NULL,
   `delivery_time` varchar(10) NOT NULL,
@@ -318,7 +329,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `orders`
@@ -347,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `order_additional_info` (
   `appartment_office_name` varchar(200) NOT NULL,
   `floor` varchar(200) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -361,11 +372,11 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   `order_id` int(11) NOT NULL,
   `laundry_id` int(11) NOT NULL,
   `qty` int(11) NOT NULL,
-  `ss_ids` text NOT NULL,
+  `ss_ids` mediumtext NOT NULL,
   `price` double(20,2) NOT NULL,
   `price_total` double(20,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `order_items`
@@ -399,11 +410,11 @@ CREATE TABLE IF NOT EXISTS `order_rating` (
   `order_id` int(11) NOT NULL,
   `star` float NOT NULL,
   `reason_id` int(11) NOT NULL,
-  `comment` text NOT NULL,
+  `comment` mediumtext NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `order_rating`
@@ -430,7 +441,7 @@ CREATE TABLE IF NOT EXISTS `order_status` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `order_status`
@@ -462,7 +473,7 @@ CREATE TABLE IF NOT EXISTS `otps` (
   `phone` varchar(50) NOT NULL,
   `otp` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `otps`
@@ -473,7 +484,8 @@ INSERT INTO `otps` (`id`, `phone`, `otp`) VALUES
 (4, '1234567', '1234'),
 (6, '1234562', '1234'),
 (11, '1234567898', '1234'),
-(14, '1234567899', '1234');
+(14, '1234567899', '1234'),
+(15, '123456789', '1234');
 
 -- --------------------------------------------------------
 
@@ -486,7 +498,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `shop_id` int(11) NOT NULL,
-  `payment_token` text NOT NULL,
+  `payment_token` mediumtext NOT NULL,
   `fill_name` varchar(200) NOT NULL,
   `total_amount` double(20,2) NOT NULL,
   `net_amount` double(20,2) NOT NULL,
@@ -494,7 +506,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `email` varchar(200) NOT NULL,
   `payment_type` varchar(50) NOT NULL COMMENT 'credit_card,cash,wallet',
   `date_received` datetime NOT NULL,
-  `address` text NOT NULL,
+  `address` mediumtext NOT NULL,
   `status` enum('pending','paid','failed') NOT NULL COMMENT 'paid,pending,failed',
   `order_amount` double(20,2) NOT NULL,
   `discount` double(20,2) NOT NULL,
@@ -505,7 +517,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `payments`
@@ -525,12 +537,12 @@ INSERT INTO `payments` (`id`, `order_id`, `shop_id`, `payment_token`, `fill_name
 DROP TABLE IF EXISTS `products`;
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) NOT NULL,
   `price` double NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `products`
@@ -549,9 +561,9 @@ INSERT INTO `products` (`id`, `name`, `price`, `created_at`, `updated_at`) VALUE
 DROP TABLE IF EXISTS `review_reasons`;
 CREATE TABLE IF NOT EXISTS `review_reasons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `description` text NOT NULL,
+  `description` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `review_reasons`
@@ -573,13 +585,13 @@ CREATE TABLE IF NOT EXISTS `riders` (
   `rider_id` int(11) NOT NULL,
   `firstname` varchar(100) NOT NULL,
   `lastname` varchar(100) NOT NULL,
-  `img` text NOT NULL,
-  `address` text NOT NULL,
+  `img` mediumtext NOT NULL,
+  `address` mediumtext NOT NULL,
   `ride_type` enum('car','bike') NOT NULL COMMENT 'car,bike',
   `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false	',
   `email_varified` enum('true','false') NOT NULL DEFAULT 'false' COMMENT 'true,false	',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `riders`
@@ -602,7 +614,7 @@ CREATE TABLE IF NOT EXISTS `rider_activity_statuses` (
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -618,18 +630,18 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `roles`
 --
 
 INSERT INTO `roles` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'super_admin', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
-(2, 'admin', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
+(1, 'admin', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
+(2, 'vendor', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
 (3, 'customer', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
-(4, 'vendor', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
-(5, 'rider', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00');
+(4, 'rider', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00'),
+(5, 'super_admin', 'Enable', '2020-09-16 00:00:00', '2020-09-16 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -642,11 +654,11 @@ CREATE TABLE IF NOT EXISTS `service_area_request` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(200) NOT NULL,
   `phone` varchar(50) NOT NULL,
-  `address` text NOT NULL,
+  `address` mediumtext NOT NULL,
   `latitude` varchar(50) NOT NULL,
   `longitude` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `service_area_request`
@@ -670,27 +682,28 @@ CREATE TABLE IF NOT EXISTS `shops` (
   `vendor_id` int(11) NOT NULL,
   `shop_name` varchar(200) NOT NULL,
   `phone` varchar(50) NOT NULL,
-  `description` text NOT NULL,
+  `description` mediumtext NOT NULL,
   `opening_time` time NOT NULL,
   `closing_time` time NOT NULL,
   `latitude` varchar(50) NOT NULL,
   `longitude` varchar(50) NOT NULL,
   `range_in_km` varchar(10) NOT NULL,
   `cleanbee_percentage` varchar(10) NOT NULL,
-  `address` text NOT NULL,
-  `image` text NOT NULL,
+  `delivery_fee` double(20,2) NOT NULL,
+  `address` mediumtext NOT NULL,
+  `image` mediumtext NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `shops`
 --
 
-INSERT INTO `shops` (`id`, `vendor_id`, `shop_name`, `phone`, `description`, `opening_time`, `closing_time`, `latitude`, `longitude`, `range_in_km`, `cleanbee_percentage`, `address`, `image`, `created_at`, `updated_at`) VALUES
-(1, 1, 'shop1', '123456789', 'shop des1', '04:00:00', '06:00:00', '25.2617', '72.1596', '10', '5', 'test addres 1', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59'),
-(2, 2, 'shop2', '123456789', 'shop des 2', '09:00:00', '10:00:00', '25.2323', '73.256', '20', '7', 'test address 2', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59');
+INSERT INTO `shops` (`id`, `vendor_id`, `shop_name`, `phone`, `description`, `opening_time`, `closing_time`, `latitude`, `longitude`, `range_in_km`, `cleanbee_percentage`, `delivery_fee`, `address`, `image`, `created_at`, `updated_at`) VALUES
+(1, 1, 'shop1', '123456789', 'shop des1', '04:00:00', '06:00:00', '25.2617', '72.1596', '10', '5', 0.00, 'test addres 1', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59'),
+(2, 2, 'shop2', '123456789', 'shop des 2', '09:00:00', '10:00:00', '25.2323', '73.256', '20', '7', 0.00, 'test address 2', '', '2020-09-18 18:23:59', '2020-09-18 18:23:59');
 
 -- --------------------------------------------------------
 
@@ -704,7 +717,7 @@ CREATE TABLE IF NOT EXISTS `shop_favourite` (
   `shop_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `shop_favourite`
@@ -726,7 +739,7 @@ CREATE TABLE IF NOT EXISTS `shop_ratings` (
   `user_id` int(11) NOT NULL,
   `rate` float NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `shop_ratings`
@@ -754,7 +767,7 @@ CREATE TABLE IF NOT EXISTS `shop_services` (
   `urgent_amt` double(20,2) NOT NULL,
   `currency` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `shop_services`
@@ -779,7 +792,7 @@ CREATE TABLE IF NOT EXISTS `slots` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `slots`
@@ -800,9 +813,9 @@ DROP TABLE IF EXISTS `tokens`;
 CREATE TABLE IF NOT EXISTS `tokens` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(200) NOT NULL,
-  `token` text NOT NULL,
+  `token` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -816,25 +829,30 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` varchar(50) NOT NULL,
   `email` varchar(200) NOT NULL,
   `password` varchar(200) NOT NULL,
-  `role_id` int(11) NOT NULL COMMENT '1=admin 2=vendor 3=customer 4=rider',
-  `privileges` text NOT NULL,
-  `token` text NOT NULL,
-  `device_token` text NOT NULL,
+  `role_id` int(11) NOT NULL COMMENT '1=admin 2=vendor 3=customer 4=rider 5=super_admin',
+  `privileges` mediumtext NOT NULL,
+  `token` mediumtext NOT NULL,
+  `device_token` mediumtext NOT NULL,
   `status` enum('Enable','Disable') NOT NULL DEFAULT 'Enable',
+  `last_login` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `created_at`, `updated_at`) VALUES
-(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'gKsfTk83zwtMDa2PncYi', '', 'Enable', '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
-(2, '123456', 'nikul222@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
-(3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
-(4, '1234567899', 'rider@gmail.com', '123456', 4, '', 'CJFHEATdvs2MpG0PS8ai', '123456', 'Enable', '2020-09-17 12:09:50', '2020-09-29 14:13:00');
+INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `last_login`, `created_at`, `updated_at`) VALUES
+(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'HMhZ8C9GVbLfFJdO5yXP', '', 'Enable', NULL, '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul222@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
+(5, '1234567899', 'admin@gmail.com', '123456', 5, '', '', '', 'Enable', '2020-09-30 12:50:51', '2020-09-30 10:00:53', '2020-09-30 10:00:53'),
+(3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
+(4, '1234567899', 'rider@gmail.com', '123456', 4, '', 'CJFHEATdvs2MpG0PS8ai', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 14:13:00'),
+(7, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'oRusFaipJZDKrVtz852c', '', 'Enable', NULL, '2020-10-05 12:28:25', '2020-10-05 12:28:25'),
+(6, '123456789', 'nikul@kartuminfotech.com', '123456', 3, '', 'Z8ifqHkhu69tAasQnl1p', '', 'Enable', NULL, '2020-10-05 10:13:38', '2020-10-05 10:13:38'),
+(8, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'ej4Zm6nDPSJy3GtHdI5Y', '123456', 'Enable', NULL, '2020-10-05 12:36:28', '2020-10-05 12:36:28');
 
 -- --------------------------------------------------------
 
@@ -849,7 +867,7 @@ CREATE TABLE IF NOT EXISTS `vendors` (
   `name` varchar(50) NOT NULL,
   `confirmed_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `vendors`
@@ -872,7 +890,7 @@ CREATE TABLE IF NOT EXISTS `vendor_payments` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -886,11 +904,11 @@ CREATE TABLE IF NOT EXISTS `wallet_history` (
   `user_id` int(11) NOT NULL,
   `amount` double(20,2) NOT NULL,
   `operation_type` enum('credit','debit') NOT NULL,
-  `description` text NOT NULL,
+  `description` mediumtext NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `wallet_history`
@@ -908,10 +926,10 @@ INSERT INTO `wallet_history` (`id`, `user_id`, `amount`, `operation_type`, `desc
 
 DROP TABLE IF EXISTS `web_config`;
 CREATE TABLE IF NOT EXISTS `web_config` (
-  `config_name` varchar(255) COLLATE latin1_spanish_ci NOT NULL DEFAULT '',
-  `config_value` text COLLATE latin1_spanish_ci NOT NULL,
+  `config_name` varchar(255) NOT NULL DEFAULT '',
+  `config_value` mediumtext NOT NULL,
   PRIMARY KEY (`config_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `web_config`
@@ -921,16 +939,16 @@ INSERT INTO `web_config` (`config_name`, `config_value`) VALUES
 ('meta_keyword', ''),
 ('sidepanel_block_title', '-'),
 ('meta_description', ''),
-('site_name', 'I bid'),
+('site_name', 'Clean Bee'),
 ('page_size', ''),
 ('powered_by', 'Powered by <a href=\"#\" target=\"_blank\" class=\"fotertext\">Nehal Mistry</a>'),
-('company_copyright', 'Copyright © I Bid services. All rights reserved'),
+('company_copyright', 'Copyright © Clean Bee services. All rights reserved'),
 ('meta_title', 'Sicanet'),
-('from_email_address', 'company@gmail.com'),
-('company_name', 'I bid'),
+('from_email_address', 'cleanbee@gmail.com'),
+('company_name', 'Clean Bee'),
 ('company_address', '52, Naist Prisam, op.MS House'),
 ('company_mobile', '1234567891'),
-('company_email', 'company@gmail.com'),
+('company_email', 'cleanbee@gmail.com'),
 ('template', 'default'),
 ('usa_cell', '0'),
 ('india_cell', '0'),

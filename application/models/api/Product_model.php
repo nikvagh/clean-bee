@@ -23,7 +23,7 @@
         public function get_shops($per_page,$page_no,$filter,$user_id){
 
             $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.image,
+            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.image,
                                 IF(sf.id > 0, "true", "false") as favourite');
             $this->db->join('shop_favourite sf','sf.shop_id = s.id AND sf.user_id='.$user_id,'left');
             // $this->db->join('shop_services ss','ss.shop_id = s.id','left');
@@ -101,7 +101,7 @@
         public function get_laundries($per_page,$page_no,$search){
             
             $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('l.id,l.name,l.arabic_name,l.does_require_car,l.image');
+            $this->db->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
             $this->db->from('laundries l');
             $this->db->order_by('l.sort_order','ASC');
             if($search != ""){
@@ -399,10 +399,24 @@
 
         }
 
+        public function get_discount($vendor_id){
+            $this->db->select('d.id,d.name,d.discount_type,d.percentage,d.value,d.applied_to,d.expiry_date');
+            $this->db->where('find_in_set('.$vendor_id.',d.vendors) > 0');
+            $this->db->where('d.expiry_date >=',$this->curr_date);
+            $this->db->from('discounts d');
+            $query = $this->db->get();
+
+            $result = array();
+            if ($query->num_rows() > 0) {
+                $result = $query->result();
+            }
+            return $result;
+        }
+
         public function check_discount_code($discount_code,$vendor_id){
             $this->db->select('d.id,d.name,d.discount_type,d.percentage,d.value,d.applied_to,d.expiry_date');
             $this->db->where('d.name',$discount_code);
-            $this->db->where('d.expiry_date <=',$this->curr_date);
+            $this->db->where('d.expiry_date >=',$this->curr_date);
             $this->db->where('find_in_set('.$vendor_id.',d.vendors) > 0');
             $this->db->from('discounts d');
             $query = $this->db->get();

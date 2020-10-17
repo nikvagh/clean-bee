@@ -65,14 +65,15 @@ $autoload['libraries'] = array(
     // 'user',
     // 'member',
     'admin',
-    // 'sp',
+    'vendor',
     //'administration',
     'form_validation',
     'system',
     'functions',
     'cart',
     'upload',
-    'accessibility'
+    'accessibility',
+    'layouts'
 );
 
 /*
@@ -106,8 +107,9 @@ $autoload['drivers'] = array();
 */
 $autoload['helper'] = array(
     'url',
+    'email',
     'functions',
-    'email'
+    'login'
 );
 
 /*

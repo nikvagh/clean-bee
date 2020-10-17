@@ -100,13 +100,13 @@
 #datatable_paginate{
     text-align: right;
 }
-.pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, .pagination > .active > span:focus, .pagination > .active > span:hover{
+/* .pagination > .active > a, .pagination > .active > a:focus, .pagination > .active > a:hover, .pagination > .active > span, .pagination > .active > span:focus, .pagination > .active > span:hover{
     background-color: #f39c12;
     border-color: #f39c12;
 }
 .nav-tabs-custom > .nav-tabs > li.active{
     border-top-color: #f39c12;
-}
+} */
 
 .sidebar-menu img{
     vertical-align: top;

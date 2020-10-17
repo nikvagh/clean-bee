@@ -6,7 +6,7 @@
             $this->load->model(ADMINPATH.'dashboard_model','dashboard');
             // $this->load->model('company_model','company');
             // $this->load->library('administration');
-            checkLogin('admin');
+            checkLogin('vendor');
             $this->load->library('layouts');
         }
         function index()

@@ -168,7 +168,6 @@ class Mail {
 
 	public function send_email2($to,$subject,$message,$attach=0,$cc="",$attachM = array())
 	{
-
 		//PHPMailer Object
 	    $mail = new PHPMailer(true); //Argument true in constructor enables exceptions
 
@@ -195,7 +194,7 @@ class Mail {
 	    $mail->Body = $message;
 
 	    if($attach !== 0){
-			// $newurl = str_replace(base_url(),$_SERVER["DOCUMENT_ROOT"].'/',rawurldecode($attach));	
+			// $newurl = str_replace(base_url(),$_SERVER["DOCUMENT_ROOT"].'/',rawurldecode($attach));
 			// echo $newurl."<br/>";
 			$newurl = $_SERVER["DOCUMENT_ROOT"].'/'.$attach;
 			// echo $newurl = $attach;

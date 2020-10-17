@@ -228,7 +228,6 @@ class User extends REST_Controller
             if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
 
                 $signup_user = array(
-                    'phone' => $_POST['phone'],
                     'email' => $_POST['email'],
                     'password' => $_POST['password'],
                     'phone' => $_POST['phone'],
@@ -383,6 +382,141 @@ class User extends REST_Controller
             
         }
 
+    }
+
+    public function login_with_other_post(){
+        $config = [
+            [
+                    'field' => 'email',
+                    'label' => 'email',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            // [
+            //         'field' => 'password',
+            //         'label' => 'password',
+            //         'rules' => 'required',
+            //         'errors' => [],
+            // ],
+            [
+                    'field' => 'device_token',
+                    'label' => 'device_token',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'login_provider',
+                    'label' => 'login_provider',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'provider_token',
+                    'label' => 'provider_token',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($_POST['login_provider'] != "google" && $_POST['login_provider'] != "fb" && $_POST['login_provider'] != "apple_id"){
+                $result['status'] = 310;
+                $result['title'] = "login_provider must be google,fb,apple_id";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+            $this->db->select('u.*');
+            $this->db->join('users u','u.id = c.customer_id','left');
+            $this->db->where('c.login_provider',$_POST['login_provider']);
+            $this->db->where('c.provider_token',$_POST['provider_token']);
+            $query1 = $this->db->get('customers c');
+
+            if ($query1->num_rows() > 0) {
+                // sign in
+                $user = $query1->row();
+                if ($user->status == 'Enable') {
+                    $this->user->update_user_token($user->id);
+                    $this->user->update_device_token($user->id,$_POST['device_token']);
+                    $customer = $this->user->get_customer_by_id($user->id);
+
+                    $result['status'] = 200;
+                    $result['title'] = "Login Success";
+                    $result['res'] = $customer;
+                    $this->response($result, REST_Controller::HTTP_OK);
+                }else{
+                    // $status_err = "Y";
+                    $result['status'] = 330;
+                    $result['title'] = "Your account is inactive, please contact our support center.";
+                    $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+                }
+
+            }else{
+                // sign up
+                $signup_user = array();
+                if(isset($_POST['phone'])){
+                    $signup_user['phone'] = $_POST['phone'];
+                }
+                $signup_user['email'] = $_POST['email'];
+                $signup_user['password'] = '';
+                $signup_user['role_id'] = 3;
+                $signup_user['token'] = "";
+            
+                if($this->db->insert('users',$signup_user)){
+                    $user_id = $this->db->insert_id();
+
+                    $signup_customer = array();
+                    $signup_customer['customer_id'] = $user_id;
+                    if(isset($_POST['firstname'])){
+                        $signup_customer['firstname'] =  $_POST['firstname'];
+                    }
+                    if(isset($_POST['lastname'])){
+                        $signup_customer['lastname'] =  $_POST['lastname'];
+                    }
+                    if(isset($_POST['username'])){
+                        $signup_customer['username'] =  $_POST['username'];
+                    }
+                    $signup_customer['img'] =  '';
+                    $signup_customer['phone_varified'] = 'false';
+                    $signup_customer['login_provider'] = $_POST['login_provider'];
+                    $signup_customer['provider_token'] = $_POST['provider_token'];
+
+                    if($this->db->insert('customers',$signup_customer)){
+                        $this->user->update_user_token($user_id);
+                        $this->user->update_device_token($user_id,$_POST['device_token']);
+                        $customer = $this->user->get_customer_by_id($user_id);
+
+                        $to = $_POST['email'];
+                        $subject = "CleanBee Confirmation";
+                        $message = "<a href='#'>Confirm Your Registration</a>";
+                        $this->load->library('mail');
+                        $this->mail->send_email2($to,$subject,$message);
+
+                        $result['status'] = 200;
+                        $result['title'] = "Sign Up Success";
+                        $result['res'] = $customer;
+                        $this->response($result, REST_Controller::HTTP_OK);
+                    }
+                }
+            }
+
+        }
     }
 
     public function user_profile_get(){

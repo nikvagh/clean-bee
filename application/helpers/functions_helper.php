@@ -50,62 +50,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('checklogin')) {
-	/**
-	 * Element
-	 *
-	 * Lets you determine whether an array index is set and whether it has a value.
-	 * If the element is empty it returns NULL (or whatever you specify as the default value.)
-	 *
-	 * @param	string
-	 * @param	array
-	 * @param	mixed
-	 * @return	mixed	depends on what the array contains
-	 */
-	function checkLogin($userType = "")
-	{
-		// echo "<pre>";
-		// print_r($_SESSION);
-		// echo "<pre>";
-		// exit;
-
-		$err = "N";
-		if (isset($_SESSION['user_type']) && $_SESSION['user_type'] != "") {
-			if ($_SESSION['user_type'] != $userType) {
-				$err = "Y";
-			}
-		} else {
-			$err = "Y";
-		}
-
-		if ($err == 'Y') {
-			if ($userType == 'member') {
-				header('Location:' . base_url() . MEMBERPATH . 'login');
-				exit;
-			} elseif ($userType == 'admin') {
-				header('Location:' . base_url() . ADMINPATH . 'login');
-				exit;
-			} elseif ($userType == 'sp') {
-				header('Location:' . base_url() . SPPATH . 'login');
-				exit;
-			} else {
-				header('Location:' . base_url() . MEMBERPATH . 'login');
-				exit;
-			}
-		}
-	}
-}
-
-if (!function_exists('destroy_login_session')) {
-	function destroy_login_session()
-	{
-		echo "<pre>";
-		print_r($_SESSION);
-		echo "<pre>";
-		exit;
-	}
-}
-
 if (!function_exists('get_last_30_yr')) {
 	function get_last_30_yr()
 	{

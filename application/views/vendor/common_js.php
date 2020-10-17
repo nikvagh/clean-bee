@@ -15,7 +15,6 @@
 <script>
   // $.widget.bridge('uibutton', $.ui.button);
 </script>
-<script src="<?php echo $this->back_assets; ?>js/custom.js"></script>
 
 <?php if (isset($dashboard)) { ?>
   <!-- <script src="<?php echo $this->back_assets; ?>plugins/knob/jquery.knob.js"></script> -->

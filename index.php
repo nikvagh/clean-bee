@@ -1,8 +1,18 @@
 <?php
-// echo date('y-m-d H:i:s');
-date_default_timezone_set('Asia/Qatar');
+// echo date('Y-m-d H:i:s');
+// date_default_timezone_set('Asia/Qatar');
+// date_default_timezone_set('UTC');
 // echo "<br/>";
-// echo date('y-m-d H:i:s');
+// echo time();
+// date_default_timezone_set("UTC");
+// echo "<br/>";
+// echo time();
+// echo "<br/>";
+// echo date('Y-m-d H:i:s');
+
+// session_start();
+// echo $_SESSION['time'];
+
 /**
  * CodeIgniter
  *
@@ -343,10 +353,11 @@ define('FROM_EMAIL', "cleanbee@gmail.com");
 
 // define('ADMINPATH', 'admin/');
 define('ADMINPATH', 'admin/');
-// define('MEMBERPATH', 'member_portal/');
+define('VENDORPATH', 'vendor/');
 // define('SPPATH', 'sp_portal/');
 
 define('UPLOADS', 'uploads/');
+define('PROFILE_PATH', UPLOADS.'profile/');
 define('CUSTOMER_PRO', UPLOADS.'customer_profile/');
 define('RIDER_PRO', UPLOADS.'rider_profile/');
 define('ADBNR_PATH', UPLOADS.'ad_banner/');

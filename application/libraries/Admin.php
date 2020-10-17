@@ -17,7 +17,6 @@ class Admin {
 		{
 			// Salt up the hash pipe
 			// Encryption key as suffix.
-			
 			return $this->obj->encrypt->sha1($password.$this->obj->config->item('encryption_key'));
 		}
 		
@@ -43,13 +42,13 @@ class Admin {
 						'loginData'		=> $user,
 						'logged_in'		=> true,
                         'date_time'     => $dt,
-                        'user_type'     => 'admin'
+                        'user_type'     => 'admin',
 					);
 					
 			$this->obj->session->set_userdata($data);
 			$this->_session_to_library();
 		}
-                
+
 		function _destroy_session()
 		{
 			$data = array(
@@ -61,18 +60,19 @@ class Admin {
 						'user_type'     => ''
 					);
 					
-			$this->obj->session->set_userdata($data);
+			// $this->obj->session->set_userdata($data);
 			foreach ($data as $key => $value)
 			{
-				$this->$key = $value;
+				// echo $_SESSION[$key];
+				// $this->$key = $value;
+				unset($_SESSION[$key]);
 			}
 		}
 		
 		function login($username, $password)
 		{
-//                    echo $username;
-//                    echo $password;exit;
-			$pass = md5($password);
+			// $pass = md5($password);
+			$pass = $password;
                         
 			// $query = $this->obj->db->get($this->table, 1);
 			
@@ -84,16 +84,15 @@ class Admin {
 //			$this->obj->db->where('admin_password', md5($password));
 //			$this->obj->db->where('admin_status', '1');
                         
-            $this->obj->db->where("(username='$username' OR email ='$username') AND password = '".$pass."' AND status = 'Enable' ");
-			
-			$query = $this->obj->db->get($this->table, 1);
+            $this->obj->db->select("u.*,r.name as user_type");
+            $this->obj->db->join("roles r","r.id = u.role_id","left");
+            $this->obj->db->where("u.email ='$username' AND u.password = '".$pass."' AND (role_id = 1 OR role_id = 5) AND u.status = 'Enable'");
+			$query = $this->obj->db->get('users u', 1);
 			// echo $this->obj->db->last_query();exit;
-			if ( $query->num_rows() == 1 )
+			if ($query->num_rows() == 1)
 			{
-//                            echo "1";
 				// We found a user!
 				// Let's save some data in their session/cookie/pocket whatever.
-				
 				$user = $query->row();
 
 				// echo "<pre>";
@@ -101,32 +100,30 @@ class Admin {
 				// echo "</pre>";exit;
 
 				$this->_start_session($user);
-				
 				$this->obj->session->set_flashdata('user', 'Login successful...');
-				
 				return true;
-			} else {   
+
+			} else {
+
 				// Login failed...
 				// Couldn't find the user,
 				// Let's destroy everything just to make sure.
 				
 				$this->_destroy_session();
-				
 				$this->obj->session->set_flashdata('user', 'Login failed...');
-				
 				return false;
 			}
 		}
+
 		function logout()
 		{
 //                        print_r($this->date_time);exit;
 //                        echo $this->obj->session->userdata();exit;
 			
-			$data=array('last_login' => $this->date_time);
+			$data = array('last_login' => $this->date_time);
 			$this->obj->db->where('id',$this->id);
 			$query=$this->obj->db->update($this->table ,$data);
-                    //    echo $this->obj->db->last_query();
-                    //    exit;
+
 			$this->_destroy_session();
 			$this->obj->session->set_flashdata('user', 'You are now logged out');
 		}

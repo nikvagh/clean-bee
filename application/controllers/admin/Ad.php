@@ -10,36 +10,84 @@
 
         function index(){
             $data['ad_manage'] = TRUE;
-            $data['title']="Ads";
+            $data['title'] = "Ads";
+            $data['page'] = "ad_list";
 
             if($this->input->post('action') == "change_publish"){
                 if ($result = $this->ad->st_update()) {
-                    $this->session->set_flashdata('notification', 'Ad status has been update successfully.');
+                    $this->session->set_flashdata('success', 'Status has been update successfully.');
                     redirect(ADMINPATH.'ad');
                 }
             }elseif(isset($_POST['action']) && $_POST['action'] == "delete"){
-                if ($result = $this->member->delete()) {
-                    $this->session->set_flashdata('notification', 'Ad deleted successfully.');
+                if ($result = $this->ad->delete()) {
+                    $this->session->set_flashdata('success', 'Ad deleted successfully.');
+                    redirect(ADMINPATH.'ad');
+                }
+            }elseif ($this->input->post('action') == "bulk_delete") {
+                if ($result = $this->ad->bulk_delete()) {
+                    $this->session->set_flashdata('success', 'Ads deleted successfully.');
+                    redirect(ADMINPATH.'ad');
+                }
+            }elseif ($this->input->post('action') == "bulk_status_update") {
+                if ($result = $this->ad->bulk_status_update()) {
+                    $this->session->set_flashdata('success', 'Status has been update successfully.');
                     redirect(ADMINPATH.'ad');
                 }
             }
-            // elseif ($this->input->post('action') == "deleteselected") {
-            //     if ($result = $this->product->deleteselected()) {
-            //         $this->session->set_flashdata('notification', 'categoty has been deleted successfully.');
-            //         redirect('product');
-            //     }
-            // }
-            
-            $data['manage_data'] = $this->ad->get_ads();
-            $this->load->view(ADMINPATH.'ad/list',$data);
+            $this->layouts->view(ADMINPATH.$data['page'],$data,'admin_dash');
         }
 
-        function add(){ 
+        function getLists(){
+            $data = $row = array();
+
+            $qData = $this->ad->getRows($_POST);
+            $i = $_POST['start'];
+            // onClick="confirmDelete(datatableForm,'.$val->id.',Ad)"
+            foreach($qData as $val){
+                $i++;
+                $status = "";
+
+                $checkbox = '<input type="checkbox" name="ids[]" id="" class="ids_check" value="'.$val->id.'"/>';
+
+                if($val->status == "Enable"){
+                    $status = '<span class="label label-success">'.$val->status.'</span>';
+                    $status .= ' <button type="button" class="btn btn-xs btn-sm btn-flat" id="status_'.$val->id.'" onClick="confirmPublishStatus(\'datatableForm\',\''.$val->id.'\',\'Disable\')">Click to Disable</button> ';
+                }else if($val->status == "Disable"){
+                    $status = '<span class="label label-danger">'.$val->status.'</span>';
+                    $status .= ' <button type="button" class="btn btn-xs btn-sm btn-flat" id="status_'.$val->id.'" onClick="confirmPublishStatus(\'datatableForm\',\''.$val->id.'\',\'Enable\')">Click to Enable</button> ';
+                }
+                $action = '<a href="'.base_url().ADMINPATH.'ad/edit/'.$val->id.'" class="btn btn-sm btn-primary btn-flat">Edit</a> ';
+                $action .= ' <button type="button" class="btn btn-danger btn-sm btn-flat" id="delete_'.$val->id.'" onClick="confirmDelete(\'datatableForm\',\''.$val->id.'\',\'Ad\')">Delete</button> ';
+               
+                // echo base_url(). ADBNR_PATH . 'thumb/50x50_' . $val['pic'];
+                if (file_exists(ADBNR_PATH . 'thumb/50x50_' . $val->img)) {
+                    $img_url = base_url() . ADBNR_PATH . 'thumb/50x50_' . $val->img;
+                } else {
+                    $img_url = "";
+                }
+
+                $img = '<img src="'.$img_url.'"/>';
+                $data[] = array($checkbox , $i, $val->id, $val->title, $img, $val->target, $val->created_at, $status, $action);
+            }
+            
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->ad->countAll(),
+                "recordsFiltered" => $this->ad->countFiltered($_POST),
+                "data" => $data,
+            );
+            
+            // Output to JSON format
+            echo json_encode($output);
+        }
+
+        function add(){
             $data['ad_form'] = TRUE;
             $data['action']='add';
             $data['title']="Ads";
+            $data['page']="ad_add";
             
-            if(isset($_POST['submit'])){
+            if(isset($_POST['action'])){
 
                 // $config = [
                 //     [
@@ -108,7 +156,7 @@
                 // }
                 
             }else{
-                $this->load->view(ADMINPATH.'ad/add',$data); 
+                $this->layouts->view(ADMINPATH.$data['page'],$data,'admin_dash');
             }
         }
 
@@ -116,11 +164,12 @@
             $data['ad_form'] = TRUE;
             $data['action']="edit";
             $data['title']="Admin Ad";
+            $data['page']="ad_edit";
+            
             // $data['companies'] = $this->ad->get_companies();
             $data['form_data'] = $this->ad->getDataById($this->uri->segment(4));
             
-            if(isset($_POST['submit'])){
-
+            if(isset($_POST['action'])){
                 // $config = [
                 //     [
                 //             'field' => 'name',
@@ -180,13 +229,14 @@
                 //     $this->form_validation->set_error_delimiters('<label class="error">', '</label>');
                 //     $this->load->view(ADMINPATH.'ad/edit',$data); 
                 // }else{
+
                     if ($result = $this->ad->update()) {
-                        $this->session->set_flashdata('notification','Ad information has been update successfully.');
+                        $this->session->set_flashdata('success','Ad information has been update successfully.');
                         redirect(ADMINPATH.'ad');
                     }
                 // }
             }else{
-                $this->load->view(ADMINPATH.'ad/edit',$data);
+                $this->layouts->view(ADMINPATH.$data['page'],$data,'admin_dash');
             }
         }
 
