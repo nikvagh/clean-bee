@@ -57,7 +57,7 @@
 			{
 				$rand_char = rand(0, $num_usable);
 
-				$string .= $use_chars{$rand_char};
+				$string .= ($use_chars{$rand_char});
 			}
 
 			return $string;

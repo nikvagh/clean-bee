@@ -15,6 +15,43 @@ class User extends REST_Controller
         $this->customer_thumb = array('50'=>'50', '120'=>'120');
     }
 
+    public function refresh_token_post(){
+
+        $config = [
+            [
+                'field' => 'user_id',
+                'label' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            $user_id = $this->input->post('user_id');
+            $token = $this->user->update_user_token($user_id);
+
+            $result['status'] = 200;
+            $result['title'] = 'otp sent successfully';
+            $result['res'] = array('token' => $token);
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+
+    }
+
     public function check_signup_post(){
 
         // echo "<pre>";
