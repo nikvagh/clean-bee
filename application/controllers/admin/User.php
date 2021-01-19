@@ -36,7 +36,7 @@
             $this->load->view(ADMINPATH.'user/list',$data);
         }
 
-        function add(){ 
+        function add(){
             $data['user_form'] = TRUE;
             $data['action']='add';
             $data['title']="Admin User";

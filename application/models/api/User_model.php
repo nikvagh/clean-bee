@@ -80,6 +80,20 @@
             return $row;
         }
 
+        public function get_credit_cards_by_id($user_id){
+            $this->db->select('u.id,u.phone,u.email,u.password,u.role_id,u.privileges,u.token,u.device_token,c.firstname,c.lastname,c.username,c.img,c.phone_varified,c.email_varified,c.wallet,c.login_provider,c.provider_token');
+            $this->db->from('users u');
+            $this->db->join('customers c','c.customer_id = u.id','left');
+            $this->db->where('u.id',$user_id);
+            $query = $this->db->get();
+
+            $row = (object) array();
+            if ($query->num_rows() > 0) {
+                $row = $query->row_array();
+            }
+            return $row;
+        }
+
         public function get_notification_by_user_id($user_id){
             $this->db->select('n.id,n.user_id,n.title,n.message,n.is_new,n.created_at');
             $this->db->from('notifications n');
@@ -116,8 +130,6 @@
                 return false;
             }
         }
-
-        
 
         public function update_email($user_id,$email){
             $success = "N";

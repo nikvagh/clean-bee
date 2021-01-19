@@ -560,11 +560,107 @@ class User extends REST_Controller
         $this->token_check();
         $user_id = $_GET['user_id'];
         $customer = $this->user->get_customer_by_id($user_id);
+        $customer = $this->user->get_credit_cards_by_id($user_id);
         
         $result['status'] = 200;
         $result['title'] = "User Info";
         $result['res'] = $customer;
         $this->response($result, REST_Controller::HTTP_OK);
+    }
+
+    public function add_card(){
+
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'card_number',
+                    'label' => 'card_number',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'expiry_date',
+                    'label' => 'expiry_date',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'cvv',
+                    'label' => 'cvv',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+
+            if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
+
+                $signup_user = array(
+                    'email' => $_POST['email'],
+                    'password' => $_POST['password'],
+                    'phone' => $_POST['phone'],
+                    'role_id' => 3,
+                    'token' => '',
+                    'device_token' => $_POST['device_token']
+                );
+
+                if($this->db->insert('users',$signup_user)){
+                    $user_id = $this->db->insert_id();
+
+                    $signup_customer = array(
+                        'customer_id' => $user_id,
+                        'firstname' => $_POST['firstname'],
+                        'lastname' => $_POST['lastname'],
+                        'username' => $_POST['username'],
+                        'img' => '',
+                        'phone_varified' => 'true'
+                    );
+                    if($this->db->insert('customers',$signup_customer)){
+                        $this->user->update_user_token($user_id);
+                        $this->user->update_device_token($user_id,$_POST['device_token']);
+                        $customer = $this->user->get_customer_by_id($user_id);
+
+                        $to = $_POST['email'];
+                        $subject = "CleanBee Confirmation";
+                        $message = "<a href='#'>Confirm Your Registration</a>";
+                        $this->load->library('mail');
+                        $this->mail->send_email2($to,$subject,$message);
+
+                        $result['status'] = 200;
+                        $result['title'] = "Sign Up Success";
+                        $result['res'] = $customer;
+                        $this->response($result, REST_Controller::HTTP_OK);
+                    }
+
+                }
+
+            }else{
+                $result['status'] = 310;
+                $result['title'] = "Wrong OTP";
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+
+        }
+
     }
 
     public function user_notificaion_get(){
