@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Oct 17, 2020 at 01:57 PM
+-- Generation Time: Jan 19, 2021 at 10:10 AM
 -- Server version: 5.7.31
--- PHP Version: 7.3.21
+-- PHP Version: 7.4.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -84,6 +84,24 @@ INSERT INTO `capabilities` (`id`, `name`, `arabic_name`, `laundry_id`, `image`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `card`
+--
+
+DROP TABLE IF EXISTS `card`;
+CREATE TABLE IF NOT EXISTS `card` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `card_number` varchar(200) NOT NULL,
+  `expiry_date` date NOT NULL,
+  `cvv` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cart`
 --
 
@@ -107,8 +125,8 @@ CREATE TABLE IF NOT EXISTS `cart` (
 --
 
 INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `price_total`, `removed`, `created_at`, `updated_at`) VALUES
-(15, 1, 1, 8, '2,1', 30.00, 240.00, 'N', '2020-09-28 18:47:52', '2020-09-28 18:47:52'),
-(14, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-28 18:47:52', '2020-09-28 18:47:52');
+(15, 1, 1, 11, '2,1', 30.00, 330.00, 'N', '2020-09-28 18:47:52', '2021-01-19 05:34:00'),
+(14, 1, 2, 3, '1', 10.00, 30.00, 'N', '2020-09-28 18:47:52', '2021-01-19 05:34:00');
 
 -- --------------------------------------------------------
 
@@ -170,7 +188,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `login_provider` enum('normal','google','fb','apple_id') NOT NULL DEFAULT 'normal' COMMENT 'normal,google,fb,apple_id',
   `provider_token` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `customers`
@@ -181,7 +199,8 @@ INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username
 (2, 2, 'nikul2', 'vag', 'username1', '1601470906_4286.JPG', 'username1', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
 (3, 6, 'nikul', 'kartum', 'nikul', '', '', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
 (4, 7, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss'),
-(5, 8, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss1');
+(5, 8, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss1'),
+(6, 9, 'nikul1', 'kartum1', 'nikul1', '', '', 'true', 'false', NULL, 0, 0.00, 'normal', '');
 
 -- --------------------------------------------------------
 
@@ -473,7 +492,7 @@ CREATE TABLE IF NOT EXISTS `otps` (
   `phone` varchar(50) NOT NULL,
   `otp` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `otps`
@@ -485,7 +504,8 @@ INSERT INTO `otps` (`id`, `phone`, `otp`) VALUES
 (6, '1234562', '1234'),
 (11, '1234567898', '1234'),
 (14, '1234567899', '1234'),
-(15, '123456789', '1234');
+(15, '123456789', '1234'),
+(16, '123456719', '1234');
 
 -- --------------------------------------------------------
 
@@ -838,21 +858,22 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'HMhZ8C9GVbLfFJdO5yXP', '', 'Enable', NULL, '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
-(2, '123456', 'nikul222@gmail.com', '123456', 3, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
+(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'ruU53PBvz0njYCI2Gtkb', '', 'Enable', NULL, '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul222@gmail.com', '123456', 3, '', 'YQnjzha8FSB2oPRApL3c', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
 (5, '1234567899', 'admin@gmail.com', '123456', 5, '', '', '', 'Enable', '2020-09-30 12:50:51', '2020-09-30 10:00:53', '2020-09-30 10:00:53'),
 (3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
 (4, '1234567899', 'rider@gmail.com', '123456', 4, '', 'CJFHEATdvs2MpG0PS8ai', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 14:13:00'),
 (7, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'oRusFaipJZDKrVtz852c', '', 'Enable', NULL, '2020-10-05 12:28:25', '2020-10-05 12:28:25'),
 (6, '123456789', 'nikul@kartuminfotech.com', '123456', 3, '', 'Z8ifqHkhu69tAasQnl1p', '', 'Enable', NULL, '2020-10-05 10:13:38', '2020-10-05 10:13:38'),
-(8, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'ej4Zm6nDPSJy3GtHdI5Y', '123456', 'Enable', NULL, '2020-10-05 12:36:28', '2020-10-05 12:36:28');
+(8, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'ej4Zm6nDPSJy3GtHdI5Y', '', 'Enable', NULL, '2020-10-05 12:36:28', '2020-10-05 12:36:28'),
+(9, '123456719', 'nikul1@kartuminfotech.com', '123456', 3, '', 'PB8gz3ampbNtf9FZevCq', '123456', 'Enable', NULL, '2021-01-16 11:47:19', '2021-01-16 11:47:19');
 
 -- --------------------------------------------------------
 
