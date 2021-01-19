@@ -193,15 +193,23 @@
             }
         }
 
-        public function update_username($user_id,$username){
+        public function update_username($user_id,$firstname,$lastname,$email,$password){
             $success = "N";
 
+            $data_customers = array(
+                // 'username'=>$username,
+                'firstname'=>$firstname,
+                'lastname'=>$lastname
+                // 'updated_at'=>$this->curr_date
+            );
             $data_user = array(
-                'username'=>$username
+                'email'=>$email,
+                'password'=>$password,
                 // 'updated_at'=>$this->curr_date
             );
             $this->db->where('customer_id',$user_id);
-            if($this->db->update('customers',$data_user)){
+            // $this->db->where('id',$user_id);
+            if($this->db->update('customers',$data_customers) && $this->db->where('id',$user_id)->update('users',$data_user)){
                 $success = "Y";
             }
 
