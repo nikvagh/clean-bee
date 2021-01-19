@@ -980,9 +980,10 @@ class User extends REST_Controller
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
             if($this->user->update_profile($_POST['user_id'],$_POST['firstname'],$_POST['lastname'],$_POST['email'],$_POST['password'])){
+                $customer = $this->user->get_customer_by_id($_POST['user_id']);
                 $result['status'] = 200;
                 $result['title'] = "profile updated successfully";
-                $result['res'] = (object) array();
+                $result['res'] =$customer;
                 $this->response($result, REST_Controller::HTTP_OK);
             }
         }
