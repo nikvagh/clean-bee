@@ -923,7 +923,7 @@ class User extends REST_Controller
         }
     }
 
-    public function update_username_post(){
+    public function update_profile_post(){
         $this->token_check();
 
         $config = [
@@ -979,7 +979,7 @@ class User extends REST_Controller
             $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
-            if($this->user->update_username($_POST['user_id'],$_POST['firstname'],$_POST['lastname'],$_POST['email'],$_POST['password'])){
+            if($this->user->update_profile($_POST['user_id'],$_POST['firstname'],$_POST['lastname'],$_POST['email'],$_POST['password'])){
                 $result['status'] = 200;
                 $result['title'] = "profile updated successfully";
                 $result['res'] = (object) array();

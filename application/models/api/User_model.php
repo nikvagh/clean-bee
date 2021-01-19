@@ -193,7 +193,7 @@
             }
         }
 
-        public function update_username($user_id,$firstname,$lastname,$email,$password){
+        public function update_profile($user_id,$firstname,$lastname,$email,$password){
             $success = "N";
 
             $data_customers = array(
