@@ -555,20 +555,387 @@ class User extends REST_Controller
 
         }
     }
+    public function primary_card_post()
+    {
+         $config = [
+                [
+                        'field' => 'user_id',
+                        'rules' => 'required',
+                        'errors' => [],
+                ],
+                [
+                        'field' => 'card_id',
+                        'rules' => 'required',
+                        'errors' => [],
+                ],
+            ];
 
+            $data = $this->input->post();
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules($config);
+            if ($this->form_validation->run() == FALSE)
+            {
+                $result['status'] = 400;
+                foreach($this->form_validation->error_array() as $key => $val){
+                    $result['title'] = $val;
+                    break;
+                }
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }else{
+
+                if($this->user->primary_card($_POST['user_id'],$_POST['card_id'])){
+
+                    $result['status'] = 200;
+                    $result['title'] = "Card Update Successfully";
+                    $result['res'] =$data;
+                    $this->response($result, REST_Controller::HTTP_OK);
+
+                }
+
+            }
+    }
+    public function office_required()
+    {
+        if($this->input->post('address_type') == 'office' && empty($this->input->post('office_number'))){
+           
+                $this->form_validation->set_message('office_required', 'office number is required');
+                return false;
+        }
+       return true;
+    }
+     public function apartment_required()
+    {
+         if($this->input->post('address_type') == 'apartment' && empty($this->input->post('apartment_number')) ){
+            
+                $this->form_validation->set_message('apartment_required', 'apartment number is required');
+                return false;
+            
+        }
+       return true;
+    }
+    public function add_address_post()
+    {
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'longitude',
+                    'label' => 'longitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'latitude',
+                    'label' => 'latitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'address_type',
+                    'label' => 'address type',
+                    'rules' => 'required',
+                    // 'rules' => 'required|callback_chk_valid_month_year',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'street_name',
+                    'label' => 'street name',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'area_zone',
+                    'label' => 'area zone',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+             [
+                    'field' => 'office_number',
+                    'label' => 'office number',
+                    'rules' => 'callback_office_required',
+                    'errors' => [],
+            ],
+             [
+                    'field' => 'apartment_number',
+                    'label' => 'apartment_number',
+                    'rules' => 'callback_apartment_required',
+                    'errors' => [],
+            ],
+        ];
+
+            $data = $this->input->post();
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules($config);
+            if ($this->form_validation->run() == FALSE)
+            {
+                $result['status'] = 400;
+                foreach($this->form_validation->error_array() as $key => $val){
+                    $result['title'] = $val;
+                    break;
+                }
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }else{
+                $office_number=null;
+                if (!empty($_POST['office_number'])) {
+                        $office_number=$_POST['office_number'];
+                }
+                $apartment_number=null;
+                if (!empty($_POST['apartment_number'])) {
+                        $apartment_number=$_POST['apartment_number'];
+                }
+                $floor_number=null;
+                if (!empty($_POST['floor_number'])) {
+                        $floor_number=$_POST['floor_number'];
+                }
+                
+
+                if($this->user->add_address($_POST['user_id'],$_POST['longitude'],$_POST['latitude'],$_POST['address_type'],$_POST['street_name'],$_POST['area_zone'],$floor_number,$office_number,$apartment_number)){
+
+                    $result['status'] = 200;
+                    $result['title'] = "Address Insert Successfully";
+                    $result['res'] =$data;
+                    $this->response($result, REST_Controller::HTTP_OK);
+
+                }
+
+            }
+    }
+    public function update_address_post()
+    {
+        $config = [
+            [
+                    'field' => 'address_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'longitude',
+                    'label' => 'longitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'latitude',
+                    'label' => 'latitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'address_type',
+                    'label' => 'address type',
+                    'rules' => 'required',
+                    // 'rules' => 'required|callback_chk_valid_month_year',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'street_name',
+                    'label' => 'street name',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'area_zone',
+                    'label' => 'area zone',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+             [
+                    'field' => 'office_number',
+                    'label' => 'office number',
+                    'rules' => 'callback_office_required',
+                    'errors' => [],
+            ],
+             [
+                    'field' => 'apartment_number',
+                    'label' => 'apartment_number',
+                    'rules' => 'callback_apartment_required',
+                    'errors' => [],
+            ],
+        ];
+
+            $data = $this->input->post();
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules($config);
+            if ($this->form_validation->run() == FALSE)
+            {
+                $result['status'] = 400;
+                foreach($this->form_validation->error_array() as $key => $val){
+                    $result['title'] = $val;
+                    break;
+                }
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }else{
+                $office_number=null;
+                if (!empty($_POST['office_number'])) {
+                        $office_number=$_POST['office_number'];
+                }
+                $apartment_number=null;
+                if (!empty($_POST['apartment_number'])) {
+                        $apartment_number=$_POST['apartment_number'];
+                }
+                $floor_number=null;
+                if (!empty($_POST['floor_number'])) {
+                        $floor_number=$_POST['floor_number'];
+                }
+                
+
+                if($this->user->update_address($_POST['address_id'],$_POST['longitude'],$_POST['latitude'],$_POST['address_type'],$_POST['street_name'],$_POST['area_zone'],$floor_number,$office_number,$apartment_number)){
+
+                    $result['status'] = 200;
+                    $result['title'] = "Address update Successfully";
+                    $result['res'] =$data;
+                    $this->response($result, REST_Controller::HTTP_OK);
+
+                }
+
+            }
+    }
+    public function address_list_get($user_id)
+        {
+            $address = $this->user->get_address_by_uesr_id($user_id);
+            $result['status'] = 200;
+            $result['title'] = "User Address List";
+            $result['res'] = $address;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+
+     public function primary_address_post()
+        {
+             $config = [
+                    [
+                            'field' => 'user_id',
+                            'rules' => 'required',
+                            'errors' => [],
+                    ],
+                    [
+                            'field' => 'address_id',
+                            'rules' => 'required',
+                            'errors' => [],
+                    ],
+                ];
+                $data = $this->input->post();
+                $this->form_validation->set_data($data);
+                $this->form_validation->set_rules($config);
+                if ($this->form_validation->run() == FALSE)
+                {
+                    $result['status'] = 400;
+                    foreach($this->form_validation->error_array() as $key => $val){
+                        $result['title'] = $val;
+                        break;
+                    }
+                    $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+
+                }else{
+                    if($this->user->primary_address($_POST['user_id'],$_POST['address_id'])){
+                        $result['status'] = 200;
+                        $result['title'] = "Address Update Successfully";
+                        $result['res'] =$data;
+                        $this->response($result, REST_Controller::HTTP_OK);
+                    }
+                }
+        }
+    public function delete_address_post()
+    {
+        $config = [
+            [
+                    'field' => 'address_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($this->user->delete_address($_POST['address_id'])){
+                $result['status'] = 200;
+                $result['title'] = "Address Delete Successfully";
+                // $result['res'] =$data;
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
+    public function user_address_get($address_id)
+        {
+            $address = $this->user->get_address($address_id);
+            $result['status'] = 200;
+            $result['title'] = "User Address";
+            $result['res'] = $address;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
     public function user_profile_get(){
         $this->token_check();
         $user_id = $_GET['user_id'];
         $customer = $this->user->get_customer_by_id($user_id);
-        $customer = $this->user->get_credit_cards_by_id($user_id);
-        
+        // $customer = $this->user->get_credit_cards_by_id($user_id);
+
+        $default = $this->user->get_cards($user_id);
+            $card = array('cards' => $default,);
+
         $result['status'] = 200;
         $result['title'] = "User Info";
-        $result['res'] = $customer;
+        $result['res'] = array_merge($customer,$card);
         $this->response($result, REST_Controller::HTTP_OK);
     }
+    public function delete_card_post()
+    {
+        $config = [
+            [
+                    'field' => 'card_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            
+        ];
 
-    public function add_card(){
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+                           
+            if($this->user->delete_card($_POST['card_id'])){
+
+                $result['status'] = 200;
+                $result['title'] = "Card Delete Successfully";
+                // $result['res'] =$data;
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }
+
+        }
+    }
+
+    public function add_card_post(){
 
         $config = [
             [
@@ -577,20 +944,28 @@ class User extends REST_Controller
                     'errors' => [],
             ],
             [
+                    'field' => 'name',
+                    'label' => 'name',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
                     'field' => 'card_number',
-                    'label' => 'card_number',
+                    'label' => 'card number',
+                    'rules' => 'required',
                     'errors' => [],
             ],
             [
                     'field' => 'expiry_date',
                     'label' => 'expiry_date',
-                    'rules' => 'required',
+                    // 'rules' => 'required',
+                    'rules' => 'required|callback_chk_valid_month_year',
                     'errors' => [],
             ],
             [
                     'field' => 'cvv',
                     'label' => 'cvv',
-                    'rules' => 'required',
+                    'rules' => 'required|min_length[3]|max_length[3]',
                     'errors' => [],
             ],
         ];
@@ -610,59 +985,32 @@ class User extends REST_Controller
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
-
-            if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
-
-                $signup_user = array(
-                    'email' => $_POST['email'],
-                    'password' => $_POST['password'],
-                    'phone' => $_POST['phone'],
-                    'role_id' => 3,
-                    'token' => '',
-                    'device_token' => $_POST['device_token']
-                );
-
-                if($this->db->insert('users',$signup_user)){
-                    $user_id = $this->db->insert_id();
-
-                    $signup_customer = array(
-                        'customer_id' => $user_id,
-                        'firstname' => $_POST['firstname'],
-                        'lastname' => $_POST['lastname'],
-                        'username' => $_POST['username'],
-                        'img' => '',
-                        'phone_varified' => 'true'
-                    );
-                    if($this->db->insert('customers',$signup_customer)){
-                        $this->user->update_user_token($user_id);
-                        $this->user->update_device_token($user_id,$_POST['device_token']);
-                        $customer = $this->user->get_customer_by_id($user_id);
-
-                        $to = $_POST['email'];
-                        $subject = "CleanBee Confirmation";
-                        $message = "<a href='#'>Confirm Your Registration</a>";
-                        $this->load->library('mail');
-                        $this->mail->send_email2($to,$subject,$message);
-
-                        $result['status'] = 200;
-                        $result['title'] = "Sign Up Success";
-                        $result['res'] = $customer;
-                        $this->response($result, REST_Controller::HTTP_OK);
-                    }
-
-                }
-
-            }else{
-                $result['status'] = 310;
-                $result['title'] = "Wrong OTP";
-                $result['res'] = (object) array();
+            $data = array('customer_id' => $_POST['user_id'],
+                                'name' => $_POST['name'],
+                                'card_number' => $_POST['card_number'],
+                                'expiry_date' => $_POST['expiry_date'].'-01',
+                                'cvv' => $_POST['cvv'],
+                                'created_at' => date('Y-m-d h:i:s'),
+                                'updated_at' => date('Y-m-d h:i:s'),
+                             );
+            if($this->user->add_card($data)){
+                $result['status'] = 200;
+                $result['title'] = "Card Insert Successfully";
+                $result['res'] =$data;
                 $this->response($result, REST_Controller::HTTP_OK);
             }
-
         }
-
     }
 
+    public function chk_valid_month_year()
+    {
+        if(preg_match('/^[0-9]{4}-(0[1-9]|1[0-2])$/', $_POST['expiry_date'])){
+            return true;
+        }else{
+            $this->form_validation->set_message('chk_valid_month_year', 'Enter Valid Expiry Date');
+            return false;
+        }
+    }
     public function user_notificaion_get(){
         $this->token_check();
         $user_id = $_GET['user_id'];
@@ -879,7 +1227,7 @@ class User extends REST_Controller
         }
     }
 
-    public function update_address_post(){
+    public function _update_address_post(){
         $this->token_check();
 
         $config = [

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 19, 2021 at 10:10 AM
--- Server version: 5.7.31
--- PHP Version: 7.4.9
+-- Generation Time: Jan 20, 2021 at 11:55 AM
+-- Server version: 8.0.21
+-- PHP Version: 7.3.21
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,12 +24,46 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `address`
+--
+
+DROP TABLE IF EXISTS `address`;
+CREATE TABLE IF NOT EXISTS `address` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `longitude` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+  `latitude` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+  `address_type` enum('office','house','apartment') COLLATE utf8_unicode_ci NOT NULL,
+  `street_name` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+  `area_zone` varchar(150) COLLATE utf8_unicode_ci NOT NULL,
+  `office_number` varchar(150) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `floor_number` varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `apartment_number` varchar(150) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `default` enum('Y','N') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `address`
+--
+
+INSERT INTO `address` (`id`, `customer_id`, `longitude`, `latitude`, `address_type`, `street_name`, `area_zone`, `office_number`, `floor_number`, `apartment_number`, `default`) VALUES
+(15, 2, '21.2373879', '72.9202789', 'apartment', 'test', 'demo', '20', '2', '5', 'N'),
+(14, 2, '21.2373879', '72.9202789', 'apartment', 'test', 'demo', NULL, '2', '5', 'N'),
+(13, 2, '21.2373879', '72.9202789', 'house', 'test', 'demo', NULL, '2', NULL, 'N'),
+(12, 2, '21.2373879', '72.9202789', 'office', 'test', 'demo', NULL, '2', NULL, 'N'),
+(11, 2, '21.2373879', '72.9202789', 'apartment', 'test', 'demo', NULL, '2', '5', 'N'),
+(18, 2, '21.2373879', '72.9202789', 'apartment', 'test', 'demo', NULL, NULL, '51', 'Y');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ads`
 --
 
 DROP TABLE IF EXISTS `ads`;
 CREATE TABLE IF NOT EXISTS `ads` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `title` mediumtext NOT NULL,
   `img` mediumtext NOT NULL,
   `target` mediumtext NOT NULL,
@@ -59,10 +93,10 @@ INSERT INTO `ads` (`id`, `title`, `img`, `target`, `status`, `created_at`, `upda
 
 DROP TABLE IF EXISTS `capabilities`;
 CREATE TABLE IF NOT EXISTS `capabilities` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `arabic_name` varchar(200) NOT NULL,
-  `laundry_id` int(11) NOT NULL,
+  `laundry_id` int NOT NULL,
   `image` mediumtext NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
@@ -89,15 +123,28 @@ INSERT INTO `capabilities` (`id`, `name`, `arabic_name`, `laundry_id`, `image`, 
 
 DROP TABLE IF EXISTS `card`;
 CREATE TABLE IF NOT EXISTS `card` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
   `name` varchar(200) NOT NULL,
   `card_number` varchar(200) NOT NULL,
   `expiry_date` date NOT NULL,
-  `cvv` int(11) NOT NULL,
+  `cvv` int NOT NULL,
+  `default` enum('Y','N') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'N',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `card`
+--
+
+INSERT INTO `card` (`id`, `customer_id`, `name`, `card_number`, `expiry_date`, `cvv`, `default`, `created_at`, `updated_at`) VALUES
+(11, 2, 'test ', '12345678', '2020-01-00', 123, 'Y', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(13, 2, 'test 1111', '12345678', '2019-05-01', 123, 'N', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(14, 2, 'test 1111', '12345678', '2019-05-01', 123, 'N', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(15, 2, 'test 1111', '12345678', '2019-05-01', 123, 'N', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(16, 2, 'test 1111', '12345678', '2019-05-01', 123, 'N', '2021-01-20 11:52:59', '2021-01-20 11:52:59');
 
 -- --------------------------------------------------------
 
@@ -107,10 +154,10 @@ CREATE TABLE IF NOT EXISTS `card` (
 
 DROP TABLE IF EXISTS `cart`;
 CREATE TABLE IF NOT EXISTS `cart` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `laundry_id` int(11) NOT NULL,
-  `qty` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `laundry_id` int NOT NULL,
+  `qty` int NOT NULL,
   `ss_ids` mediumtext NOT NULL,
   `price` double(20,2) NOT NULL,
   `price_total` double(20,2) NOT NULL,
@@ -136,7 +183,7 @@ INSERT INTO `cart` (`id`, `user_id`, `laundry_id`, `qty`, `ss_ids`, `price`, `pr
 
 DROP TABLE IF EXISTS `contents`;
 CREATE TABLE IF NOT EXISTS `contents` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `content` mediumtext NOT NULL,
   `page_type` varchar(100) NOT NULL,
   `language` varchar(100) NOT NULL,
@@ -153,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `contents` (
 
 DROP TABLE IF EXISTS `currency`;
 CREATE TABLE IF NOT EXISTS `currency` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `currency_name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
@@ -173,8 +220,8 @@ INSERT INTO `currency` (`id`, `currency_name`) VALUES
 
 DROP TABLE IF EXISTS `customers`;
 CREATE TABLE IF NOT EXISTS `customers` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `customer_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
   `firstname` varchar(150) NOT NULL,
   `lastname` varchar(150) NOT NULL,
   `username` varchar(100) NOT NULL,
@@ -183,7 +230,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `phone_varified` enum('true','false') NOT NULL COMMENT 'true,false',
   `email_varified` enum('true','false') NOT NULL DEFAULT 'false',
   `confirmed_at` datetime DEFAULT NULL,
-  `refer_from` int(11) NOT NULL,
+  `refer_from` int NOT NULL,
   `wallet` double(20,2) NOT NULL,
   `login_provider` enum('normal','google','fb','apple_id') NOT NULL DEFAULT 'normal' COMMENT 'normal,google,fb,apple_id',
   `provider_token` mediumtext NOT NULL,
@@ -195,8 +242,8 @@ CREATE TABLE IF NOT EXISTS `customers` (
 --
 
 INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username`, `img`, `address`, `phone_varified`, `email_varified`, `confirmed_at`, `refer_from`, `wallet`, `login_provider`, `provider_token`) VALUES
-(1, 1, 'nikul2', 'vag', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00, 'normal', ''),
-(2, 2, 'nikul2', 'vag', 'username1', '1601470906_4286.JPG', 'username1', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
+(1, 1, 'test111', 'demo22', 'test_user', '', '', 'true', 'false', NULL, 0, 68.00, 'normal', ''),
+(2, 2, 'nikul2', 'vag', 'username1', '1601470906_4286.JPG', '21.2373879', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
 (3, 6, 'nikul', 'kartum', 'nikul', '', '', 'true', 'false', NULL, 0, 0.00, 'normal', ''),
 (4, 7, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss'),
 (5, 8, 'nikul', 'kartum', 'nikul', '', '', 'false', 'false', NULL, 0, 0.00, 'google', 'ss1'),
@@ -210,7 +257,7 @@ INSERT INTO `customers` (`id`, `customer_id`, `firstname`, `lastname`, `username
 
 DROP TABLE IF EXISTS `discounts`;
 CREATE TABLE IF NOT EXISTS `discounts` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `discount_type` enum('percentage','value') NOT NULL,
   `percentage` varchar(10) NOT NULL,
@@ -240,11 +287,11 @@ INSERT INTO `discounts` (`id`, `name`, `discount_type`, `percentage`, `value`, `
 
 DROP TABLE IF EXISTS `laundries`;
 CREATE TABLE IF NOT EXISTS `laundries` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `arabic_name` varchar(200) NOT NULL,
   `does_require_car` enum('Y','N') NOT NULL,
-  `sort_order` int(11) NOT NULL,
+  `sort_order` int NOT NULL,
   `image` mediumtext NOT NULL,
   `specification` mediumtext NOT NULL,
   `created_at` datetime NOT NULL,
@@ -298,8 +345,8 @@ INSERT INTO `laundries` (`id`, `name`, `arabic_name`, `does_require_car`, `sort_
 
 DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
   `title` mediumtext NOT NULL,
   `message` mediumtext NOT NULL,
   `is_new` enum('true','false') NOT NULL DEFAULT 'true' COMMENT 'true,false',
@@ -325,10 +372,10 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `is_new`, `cre
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE IF NOT EXISTS `orders` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `rider_id` int(11) NOT NULL,
-  `shop_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `rider_id` int NOT NULL,
+  `shop_id` int NOT NULL,
   `order_type` varchar(200) NOT NULL,
   `pick_location` varchar(200) NOT NULL,
   `pickup_date` date NOT NULL,
@@ -338,7 +385,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `delivery_date` date NOT NULL,
   `delivery_hour` varchar(10) NOT NULL,
   `delivery_time` varchar(10) NOT NULL,
-  `order_status` int(11) NOT NULL,
+  `order_status` int NOT NULL,
   `order_cost` double(20,2) NOT NULL,
   `delivery_fee` double(20,2) NOT NULL,
   `pick_lat` varchar(50) NOT NULL,
@@ -370,8 +417,8 @@ INSERT INTO `orders` (`id`, `user_id`, `rider_id`, `shop_id`, `order_type`, `pic
 
 DROP TABLE IF EXISTS `order_additional_info`;
 CREATE TABLE IF NOT EXISTS `order_additional_info` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
   `street_no` varchar(100) NOT NULL,
   `house_building_no` varchar(100) NOT NULL,
   `appartment_office_name` varchar(200) NOT NULL,
@@ -387,10 +434,10 @@ CREATE TABLE IF NOT EXISTS `order_additional_info` (
 
 DROP TABLE IF EXISTS `order_items`;
 CREATE TABLE IF NOT EXISTS `order_items` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `laundry_id` int(11) NOT NULL,
-  `qty` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `laundry_id` int NOT NULL,
+  `qty` int NOT NULL,
   `ss_ids` mediumtext NOT NULL,
   `price` double(20,2) NOT NULL,
   `price_total` double(20,2) NOT NULL,
@@ -425,10 +472,10 @@ INSERT INTO `order_items` (`id`, `order_id`, `laundry_id`, `qty`, `ss_ids`, `pri
 
 DROP TABLE IF EXISTS `order_rating`;
 CREATE TABLE IF NOT EXISTS `order_rating` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
   `star` float NOT NULL,
-  `reason_id` int(11) NOT NULL,
+  `reason_id` int NOT NULL,
   `comment` mediumtext NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -452,11 +499,11 @@ INSERT INTO `order_rating` (`id`, `order_id`, `star`, `reason_id`, `comment`, `c
 
 DROP TABLE IF EXISTS `order_status`;
 CREATE TABLE IF NOT EXISTS `order_status` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `status_code` varchar(100) NOT NULL,
   `status_title` varchar(150) NOT NULL,
   `status` enum('Enable','Disable') NOT NULL DEFAULT 'Enable',
-  `sort_code` int(11) NOT NULL,
+  `sort_code` int NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -488,7 +535,7 @@ INSERT INTO `order_status` (`id`, `status_code`, `status_title`, `status`, `sort
 
 DROP TABLE IF EXISTS `otps`;
 CREATE TABLE IF NOT EXISTS `otps` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `phone` varchar(50) NOT NULL,
   `otp` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
@@ -515,9 +562,9 @@ INSERT INTO `otps` (`id`, `phone`, `otp`) VALUES
 
 DROP TABLE IF EXISTS `payments`;
 CREATE TABLE IF NOT EXISTS `payments` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_id` int(11) NOT NULL,
-  `shop_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `shop_id` int NOT NULL,
   `payment_token` mediumtext NOT NULL,
   `fill_name` varchar(200) NOT NULL,
   `total_amount` double(20,2) NOT NULL,
@@ -556,7 +603,7 @@ INSERT INTO `payments` (`id`, `order_id`, `shop_id`, `payment_token`, `fill_name
 
 DROP TABLE IF EXISTS `products`;
 CREATE TABLE IF NOT EXISTS `products` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `price` double NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -580,7 +627,7 @@ INSERT INTO `products` (`id`, `name`, `price`, `created_at`, `updated_at`) VALUE
 
 DROP TABLE IF EXISTS `review_reasons`;
 CREATE TABLE IF NOT EXISTS `review_reasons` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `description` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
@@ -601,8 +648,8 @@ INSERT INTO `review_reasons` (`id`, `description`) VALUES
 
 DROP TABLE IF EXISTS `riders`;
 CREATE TABLE IF NOT EXISTS `riders` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `rider_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rider_id` int NOT NULL,
   `firstname` varchar(100) NOT NULL,
   `lastname` varchar(100) NOT NULL,
   `img` mediumtext NOT NULL,
@@ -628,8 +675,8 @@ INSERT INTO `riders` (`id`, `rider_id`, `firstname`, `lastname`, `img`, `address
 
 DROP TABLE IF EXISTS `rider_activity_statuses`;
 CREATE TABLE IF NOT EXISTS `rider_activity_statuses` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `rider_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rider_id` int NOT NULL,
   `status` varchar(50) NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
@@ -644,7 +691,7 @@ CREATE TABLE IF NOT EXISTS `rider_activity_statuses` (
 
 DROP TABLE IF EXISTS `roles`;
 CREATE TABLE IF NOT EXISTS `roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `status` enum('Enable','Disable') NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -671,7 +718,7 @@ INSERT INTO `roles` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
 
 DROP TABLE IF EXISTS `service_area_request`;
 CREATE TABLE IF NOT EXISTS `service_area_request` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(200) NOT NULL,
   `phone` varchar(50) NOT NULL,
   `address` mediumtext NOT NULL,
@@ -698,8 +745,8 @@ INSERT INTO `service_area_request` (`id`, `email`, `phone`, `address`, `latitude
 
 DROP TABLE IF EXISTS `shops`;
 CREATE TABLE IF NOT EXISTS `shops` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `vendor_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `vendor_id` int NOT NULL,
   `shop_name` varchar(200) NOT NULL,
   `phone` varchar(50) NOT NULL,
   `description` mediumtext NOT NULL,
@@ -733,9 +780,9 @@ INSERT INTO `shops` (`id`, `vendor_id`, `shop_name`, `phone`, `description`, `op
 
 DROP TABLE IF EXISTS `shop_favourite`;
 CREATE TABLE IF NOT EXISTS `shop_favourite` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `shop_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shop_id` int NOT NULL,
+  `user_id` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
@@ -754,9 +801,9 @@ INSERT INTO `shop_favourite` (`id`, `shop_id`, `user_id`) VALUES
 
 DROP TABLE IF EXISTS `shop_ratings`;
 CREATE TABLE IF NOT EXISTS `shop_ratings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `shop_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shop_id` int NOT NULL,
+  `user_id` int NOT NULL,
   `rate` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
@@ -779,13 +826,13 @@ INSERT INTO `shop_ratings` (`id`, `shop_id`, `user_id`, `rate`) VALUES
 
 DROP TABLE IF EXISTS `shop_services`;
 CREATE TABLE IF NOT EXISTS `shop_services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `shop_id` int(11) NOT NULL,
-  `laundry_id` int(11) NOT NULL,
-  `capability_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shop_id` int NOT NULL,
+  `laundry_id` int NOT NULL,
+  `capability_id` int NOT NULL,
   `standard_amt` double(20,2) NOT NULL,
   `urgent_amt` double(20,2) NOT NULL,
-  `currency` int(11) NOT NULL,
+  `currency` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
@@ -805,7 +852,7 @@ INSERT INTO `shop_services` (`id`, `shop_id`, `laundry_id`, `capability_id`, `st
 
 DROP TABLE IF EXISTS `slots`;
 CREATE TABLE IF NOT EXISTS `slots` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `available` enum('Y','N') NOT NULL,
@@ -831,7 +878,7 @@ INSERT INTO `slots` (`id`, `start_time`, `end_time`, `available`, `created_at`, 
 
 DROP TABLE IF EXISTS `tokens`;
 CREATE TABLE IF NOT EXISTS `tokens` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(200) NOT NULL,
   `token` mediumtext NOT NULL,
   PRIMARY KEY (`id`)
@@ -845,11 +892,11 @@ CREATE TABLE IF NOT EXISTS `tokens` (
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `phone` varchar(50) NOT NULL,
   `email` varchar(200) NOT NULL,
   `password` varchar(200) NOT NULL,
-  `role_id` int(11) NOT NULL COMMENT '1=admin 2=vendor 3=customer 4=rider 5=super_admin',
+  `role_id` int NOT NULL COMMENT '1=admin 2=vendor 3=customer 4=rider 5=super_admin',
   `privileges` mediumtext NOT NULL,
   `token` mediumtext NOT NULL,
   `device_token` mediumtext NOT NULL,
@@ -865,15 +912,15 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`, `token`, `device_token`, `status`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, '1234562', 'nikul2vaghani@gmail.com', '1234567', 3, '', 'ruU53PBvz0njYCI2Gtkb', '', 'Enable', NULL, '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
-(2, '123456', 'nikul222@gmail.com', '123456', 3, '', 'YQnjzha8FSB2oPRApL3c', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
+(1, '1234562', 'test11234@gmail.com2', '12345789', 3, '', 'K9tEuF4pPhMIsLJgTkQj', '', 'Enable', NULL, '2020-09-17 12:07:04', '2020-09-17 12:07:04'),
+(2, '123456', 'nikul222@gmail.com', '123456', 3, '', '4pSNs2YRjdqn8Lorw9OI', '123456', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 09:40:18'),
 (5, '1234567899', 'admin@gmail.com', '123456', 5, '', '', '', 'Enable', '2020-09-30 12:50:51', '2020-09-30 10:00:53', '2020-09-30 10:00:53'),
 (3, '123456', 'vendor@gmail.com', '123456', 2, '', '1yRpCa40KdfLEbnuJOUG', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-17 10:19:48'),
 (4, '1234567899', 'rider@gmail.com', '123456', 4, '', 'CJFHEATdvs2MpG0PS8ai', '', 'Enable', NULL, '2020-09-17 12:09:50', '2020-09-29 14:13:00'),
 (7, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'oRusFaipJZDKrVtz852c', '', 'Enable', NULL, '2020-10-05 12:28:25', '2020-10-05 12:28:25'),
 (6, '123456789', 'nikul@kartuminfotech.com', '123456', 3, '', 'Z8ifqHkhu69tAasQnl1p', '', 'Enable', NULL, '2020-10-05 10:13:38', '2020-10-05 10:13:38'),
 (8, '123456789', 'nikul21@kartuminfotech.com', '', 3, '', 'ej4Zm6nDPSJy3GtHdI5Y', '', 'Enable', NULL, '2020-10-05 12:36:28', '2020-10-05 12:36:28'),
-(9, '123456719', 'nikul1@kartuminfotech.com', '123456', 3, '', 'PB8gz3ampbNtf9FZevCq', '123456', 'Enable', NULL, '2021-01-16 11:47:19', '2021-01-16 11:47:19');
+(9, '123456719', 'nikul1@kartuminfotech.com', '123456', 3, '', 'PB8gz3ampbNtf9FZevCq', '', 'Enable', NULL, '2021-01-16 11:47:19', '2021-01-16 11:47:19');
 
 -- --------------------------------------------------------
 
@@ -883,8 +930,8 @@ INSERT INTO `users` (`id`, `phone`, `email`, `password`, `role_id`, `privileges`
 
 DROP TABLE IF EXISTS `vendors`;
 CREATE TABLE IF NOT EXISTS `vendors` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `vendor_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `vendor_id` int NOT NULL,
   `name` varchar(50) NOT NULL,
   `confirmed_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
@@ -905,8 +952,8 @@ INSERT INTO `vendors` (`id`, `vendor_id`, `name`, `confirmed_at`) VALUES
 
 DROP TABLE IF EXISTS `vendor_payments`;
 CREATE TABLE IF NOT EXISTS `vendor_payments` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `vendor_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `vendor_id` int NOT NULL,
   `amount` double(20,2) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -921,8 +968,8 @@ CREATE TABLE IF NOT EXISTS `vendor_payments` (
 
 DROP TABLE IF EXISTS `wallet_history`;
 CREATE TABLE IF NOT EXISTS `wallet_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
   `amount` double(20,2) NOT NULL,
   `operation_type` enum('credit','debit') NOT NULL,
   `description` mediumtext NOT NULL,

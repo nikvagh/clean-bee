@@ -174,7 +174,7 @@
             }
         }
 
-        public function update_address($user_id,$address){
+        public function _update_address($user_id,$address){
             $success = "N";
 
             $data_user = array(
@@ -365,23 +365,122 @@
         }
 
 
+        function add_card($data){
+            
+            if($this->db->insert('card',$data)){
+                $success = "Y";
+            }
 
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function get_cards($user_id){
 
+            $this->db->where('customer_id',$user_id);
+            // $this->db->where('default','Y');
+            $query=$this->db->get('card');
+            $result=$query->result();
+            $data=[];
+            foreach ($result as $value) {
+               $data[] = array('id' =>$value->id,
+                                'customer_id' =>$value->customer_id,
+                                'name' =>$value->name,
+                                'card_number' =>$value->card_number,
+                                'expiry_year_month' =>date("Y-m", strtotime($value->expiry_date)),
+                                'expiry_year' =>date("Y", strtotime($value->expiry_date)),
+                                'expiry_month' =>date("m", strtotime($value->expiry_date)),
+                                'cvv' =>$value->cvv,
+                                'default' =>$value->default, );
+            }
+            // print_r($data);
+            // exit();
+            return $data;
+        }
+        
+        function primary_card($user_id,$card_id){
 
+            $data = array(
+                'default'=>'N',
+            );
+            $this->db->where('customer_id',$user_id)->update('card',$data);
+            $new_data = array(
+                'default'=>'Y',
+            );
+            $this->db->where('id',$card_id)->update('card',$new_data);
+            return true;
+        }
+        public function delete_card($card_id)
+        {
+            $this->db->where('id', $card_id);
+            if ($query = $this->db->delete('card')){
+                return true;
+            }else{
+                return false;
+            }
+        }
 
+        function add_address($user_id,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number){
+            $data = array('customer_id' => $user_id,
+                            'longitude' => $longitude,
+                            'latitude' => $latitude,
+                            'address_type' => $address_type,
+                            'street_name' => $street_name,
+                            'area_zone' => $area_zone,
+                            'office_number' => $office_number,
+                            'floor_number' => $floor_number,
+                            'apartment_number' => $apartment_number,
+                             );
 
+                 if($this->db->insert('address',$data)){
+                    $id=$this->db->insert_id();
+                    return true;
+                }else{
+                    return false;
+                }
+        }
+        public function update_address($address_id,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number)
+        {
+           $data = array('longitude' => $longitude,
+                            'latitude' => $latitude,
+                            'address_type' => $address_type,
+                            'street_name' => $street_name,
+                            'area_zone' => $area_zone,
+                            'office_number' => $office_number,
+                            'floor_number' => $floor_number,
+                            'apartment_number' => $apartment_number,
+                             );
 
+            $this->db->where('id',$address_id);
+             if($this->db->update('address',$data)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+         public function delete_address($address_id)
+        {
+            $this->db->where('id', $address_id);
+            if ($query = $this->db->delete('address')){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function primary_address($user_id,$address_id){
 
-
-
-
-
-
-
-
-
-
-
+            $data = array(
+                'default'=>'N',
+            );
+            $this->db->where('customer_id',$user_id)->update('address',$data);
+            $new_data = array(
+                'default'=>'Y',
+            );
+            $this->db->where('id',$address_id)->update('address',$new_data);
+            return true;
+        }
         function insert(){
             $date = date('Y-m-d h:i:s');
             $data=array(
@@ -397,7 +496,24 @@
                 return false;
             }
         }
-
+        function get_address_by_uesr_id($user_id)
+        {
+            $this->db->where('customer_id', $user_id);
+            $this->db->select('*');
+            $query = $this->db->get('address');
+            $result = array();
+                if ($query->num_rows() > 0) {
+                    $result = $query->result_array();
+                }
+            return $result;
+        }
+        public function get_address($address_id)
+        {   
+            $this->db->where('id', $address_id);
+            $query = $this->db->get('address');
+            $ret = $query->row();
+            return $ret;
+        }
         function update(){
             $date = date('Y-m-d h:i:s');
             $data = array(
