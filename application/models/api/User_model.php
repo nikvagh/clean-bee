@@ -547,6 +547,57 @@
             else
                 return false;
         }
-        
+        public function check_phone($phone)
+        {
+             $this->db->where('phone', $phone);
+             $query = $this->db->get('users') ;
+            if ($query->num_rows() > 0){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        public function check_phone_otp_send($phone)
+        {
+            $this->db->where('phone', $phone);
+             $query = $this->db->get('otps') ;
+            if ($query->num_rows() > 0){
+                return true;
+            }else{
+                return false;
+            }
+        }
+         function send_otp($phone,$otp){
+            // $this->db->where('phone', $phone);
+            // $dlt_old_otp = $this->db->delete('otps');
+            $data_otp = array(
+                'phone'=>$phone,
+                'otp'=>$otp
+            );
+            if($this->db->insert('otps',$data_otp)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        public function forgot_password_update($phone,$password)
+        {
+             $success = "N";
+
+            $data_user = array(
+                'password'=>$password
+                // 'updated_at'=>$this->curr_date
+            );
+            $this->db->where('phone',$phone);
+            if($this->db->update('users',$data_user)){
+                $success = "Y";
+            }
+
+            if($success == "Y"){
+                return true;
+            }else{
+                return false;
+            }
+        }
     }
 ?>

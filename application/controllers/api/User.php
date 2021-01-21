@@ -1670,5 +1670,166 @@ class User extends REST_Controller
             return true;
         }
     }
+    public function forgot_password_send_post()
+    {
+       $config = [
+            [
+                    'field' => 'phone',
+                    'label' => 'Phone',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'country_code',
+                    'label' => 'country code',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
 
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            if ($this->user->check_phone($_POST['phone'])) {
+               // sent otp
+                $otp = "1234";
+                // $otp = otp_generate(4);
+                // sent_otp();
+                if ($this->user->check_phone_otp_send($_POST['phone'])) {
+                        if($this->user->update_otp($_POST['phone'],$otp)){
+                            $result['status'] = 200;
+                            $result['title'] = 'otp sent successfully';
+                            $result['res'] = (object) array();
+                            $this->response($result, REST_Controller::HTTP_OK);
+                        }
+                }else{
+                     if($this->user->send_otp($_POST['phone'],$otp)){
+                            $result['status'] = 200;
+                            $result['title'] = 'otp sent successfully';
+                            $result['res'] = (object) array();
+                            $this->response($result, REST_Controller::HTTP_OK);
+                        }
+                }
+            }
+            else{
+                $result['status'] = 400;
+                $result['title'] = 'Phone Number Do Not Exist';
+                // $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }  
+    }
+    public function forgot_password_match_post()
+    {
+         $config = [
+            [
+                    'field' => 'phone',
+                    'label' => 'Phone',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            // [
+            //         'field' => 'country_code',
+            //         'label' => 'country code',
+            //         'rules' => 'required',
+            //         'errors' => [],
+            // ],
+            [
+                    'field' => 'otp',
+                    'label' => 'otp',
+                    'rules' => 'required',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            if ($this->user->check_otp($_POST['phone'],$_POST['otp'])) {
+                    $result['status'] = 200;
+                    $result['title'] = 'otp match successfully';
+                    $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+               
+            }else{
+                    $result['status'] = 400;
+                    $result['title'] = 'otp do Not Match.';
+                    $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+            }
+            
+        }  
+    }
+    public function forgot_password_change_post()
+    {
+         $config = [
+            [
+                    'field' => 'phone',
+                    'label' => 'Phone',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'password',
+                    'label' => 'Password',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'confirm_password',
+                    'label' => 'confirm password',
+                    'rules' => 'required|matches[password]',
+                    'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            if ($this->user->forgot_password_update($_POST['phone'],$_POST['password'])) {
+                    $result['status'] = 200;
+                    $result['title'] = 'Password Update successfully';
+                    // $result['res'] = (object) array();
+                    $this->response($result, REST_Controller::HTTP_OK);
+               
+            }
+            
+        }  
+    }
 }
