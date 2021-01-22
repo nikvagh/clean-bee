@@ -442,7 +442,7 @@
                     return false;
                 }
         }
-        public function update_address($address_id,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number)
+        public function update_address($address_id,$building_number,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number)
         {
            $data = array('longitude' => $longitude,
                             'latitude' => $latitude,
@@ -452,6 +452,7 @@
                             'office_number' => $office_number,
                             'floor_number' => $floor_number,
                             'apartment_number' => $apartment_number,
+                            'building_number' => $building_number,
                              );
 
             $this->db->where('id',$address_id);
