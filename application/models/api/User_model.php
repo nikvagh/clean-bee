@@ -336,7 +336,7 @@
             $data_customer = array();
             // $data_customer['wallet'] = "wallet+".(int)$amount."";
             $this->db->set('wallet', 'wallet+'.(float)$amount, FALSE); 
-            $this->db->where('id',$user_id);
+            $this->db->where('customer_id',$user_id);
             if($this->db->update('customers',$data_customer)){
 
                 $operation_type = "credit";
