@@ -541,12 +541,13 @@ class User extends REST_Controller
                         $this->user->update_user_token($user_id);
                         $this->user->update_device_token($user_id,$_POST['device_token']);
                         $customer = $this->user->get_customer_by_id($user_id);
-
-                        $to = $_POST['email'];
-                        $subject = "CleanBee Confirmation";
-                        $message = "<a href='#'>Confirm Your Registration</a>";
-                        $this->load->library('mail');
-                        $this->mail->send_email2($to,$subject,$message);
+                        if (isset($_POST['email']) && $_POST['email'] != '') {
+                            $to = $_POST['email'];
+                            $subject = "CleanBee Confirmation";
+                            $message = "<a href='#'>Confirm Your Registration</a>";
+                            $this->load->library('mail');
+                            $this->mail->send_email2($to,$subject,$message);
+                        }
 
                         $result['status'] = 200;
                         $result['title'] = "Sign Up Success";
