@@ -45,7 +45,7 @@ class User extends REST_Controller
             $token = $this->user->update_user_token($user_id);
 
             $result['status'] = 200;
-            $result['title'] = 'otp sent successfully';
+            $result['title'] = 'refresh token successfully';
             $result['res'] = array('token' => $token);
             $this->response($result, REST_Controller::HTTP_OK);
         }
@@ -423,12 +423,7 @@ class User extends REST_Controller
 
     public function login_with_other_post(){
         $config = [
-            [
-                    'field' => 'email',
-                    'label' => 'email',
-                    'rules' => 'required',
-                    'errors' => [],
-            ],
+           
             // [
             //         'field' => 'password',
             //         'label' => 'password',
@@ -454,6 +449,14 @@ class User extends REST_Controller
                     'errors' => [],
             ],
         ];
+         if ($_POST['login_provider'] != 'apple_id') {
+                $config = [ [
+                        'field' => 'email',
+                        'label' => 'email',
+                        'rules' => 'required',
+                        'errors' => [],
+                ]];
+            }
 
         $data = $this->input->post();
         $this->form_validation->set_data($data);
