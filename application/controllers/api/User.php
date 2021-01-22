@@ -628,6 +628,12 @@ class User extends REST_Controller
                     'errors' => [],
             ],
             [
+                    'field' => 'building_number',
+                    'label' => 'Building Number',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
                     'field' => 'longitude',
                     'label' => 'longitude',
                     'rules' => 'required',
@@ -700,7 +706,7 @@ class User extends REST_Controller
                 }
                 
 
-                if($this->user->add_address($_POST['user_id'],$_POST['longitude'],$_POST['latitude'],$_POST['address_type'],$_POST['street_name'],$_POST['area_zone'],$floor_number,$office_number,$apartment_number)){
+                if($this->user->add_address($_POST['user_id'],$_POST['building_number'],$_POST['longitude'],$_POST['latitude'],$_POST['address_type'],$_POST['street_name'],$_POST['area_zone'],$floor_number,$office_number,$apartment_number)){
 
                     $result['status'] = 200;
                     $result['title'] = "Address Insert Successfully";

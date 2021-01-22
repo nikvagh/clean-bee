@@ -422,7 +422,7 @@
             }
         }
 
-        function add_address($user_id,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number){
+        function add_address($user_id,$building_number,$longitude,$latitude,$address_type,$street_name,$area_zone,$floor_number,$office_number,$apartment_number){
             $data = array('customer_id' => $user_id,
                             'longitude' => $longitude,
                             'latitude' => $latitude,
@@ -432,6 +432,7 @@
                             'office_number' => $office_number,
                             'floor_number' => $floor_number,
                             'apartment_number' => $apartment_number,
+                            'building_number' => $building_number,
                              );
 
                  if($this->db->insert('address',$data)){
