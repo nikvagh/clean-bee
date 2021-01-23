@@ -20,8 +20,8 @@ class Home extends REST_Controller
         $this->token_check();
         $ads = $this->api->get_ads();
         $order_again = $this->api->order_again($id);
-        $freedelivery = $this->api->freedelivery();
-        $twenty_four_hours = $this->api->twenty_four_hours(); 
+        $freedelivery = $this->api->freedelivery($id);
+        $twenty_four_hours = $this->api->twenty_four_hours($id); 
 
         $res = array('Banner' => $ads,'Order_Again' => $order_again,'FreeDelivery' => $freedelivery,'24hrs' => $twenty_four_hours, );
         $result['status'] = 200;

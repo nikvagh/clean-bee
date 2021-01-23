@@ -67,7 +67,7 @@
                 return $result;
             }
         }
-        public function freedelivery()
+        public function freedelivery($id)
         {
             $query = $this->db->where('freedelivery','Y')
                         ->limit(3)
@@ -80,13 +80,15 @@
                             $img = base_url().shop_IMG_PATH.$val->image;
                         }else{  $img = ""; }
 
-                        // $favourite=$this->db->where('shop_id',$val->id)
-                        //                     ->where('shop_id',$val->id)
-                        //                     ->get('shop_favourite')
-                        //                     ->row();
-
-                        // print_r($favourite);
-                        // exit();
+                        $shop_favourite=$this->db->where('shop_id',$val->id)
+                                            ->where('user_id',$id)
+                                            ->get('shop_favourite')
+                                            ->row();
+                        $favourite= true;                    
+                        if (empty($shop_favourite)) {
+                           $favourite= false;
+                        }
+                        
                          $shop_ratings = $this->db->where('shop_id',$val->id)
                             ->select('AVG(rate) as rate')
                                     ->get('shop_ratings')->row();
@@ -100,12 +102,14 @@
                             'shop_name' => $val->shop_name,
                             'image' => $img,
                             'minimum_order' => $val->minimum_order,
-                            'review_count' => $rate, );
+                            'review_count' => $rate,
+                            'favourite' => $favourite,
+                            'offer'=> '10% off' );
                     }
                 }
             return $result;
         }
-        public function twenty_four_hours()
+        public function twenty_four_hours($id)
         {
            $query = $this->db->where('24hrs','Y')
                         ->limit(3)
@@ -118,6 +122,15 @@
                             $img = base_url().shop_IMG_PATH.$val->image;
                         }else{  $img = ""; }
 
+                        $shop_favourite=$this->db->where('shop_id',$val->id)
+                                            ->where('user_id',$id)
+                                            ->get('shop_favourite')
+                                            ->row();
+                        $favourite= true;                    
+                        if (empty($shop_favourite)) {
+                           $favourite= false;
+                        }
+
                          $shop_ratings = $this->db->where('shop_id',$val->id)
                             ->select('AVG(rate) as rate')
                                     ->get('shop_ratings')->row();
@@ -129,10 +142,13 @@
                             'shop_name' => $val->shop_name,
                             'image' => $img,
                             'minimum_order' => $val->minimum_order,
-                            'review_count' => $rate, );
+                            'review_count' => $rate,
+                            'favourite' => $favourite,
+                            'offer'=> '10% off');
                     }
                 }
             return $result;
         }
+        
     }
 ?>

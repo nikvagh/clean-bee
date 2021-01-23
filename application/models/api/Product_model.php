@@ -23,7 +23,7 @@
         public function get_shops($per_page,$page_no,$filter,$user_id){
 
             $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.image,
+            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.minimum_order,s.image,
                                 IF(sf.id > 0, "true", "false") as favourite');
             $this->db->join('shop_favourite sf','sf.shop_id = s.id AND sf.user_id='.$user_id,'left');
             // $this->db->join('shop_services ss','ss.shop_id = s.id','left');
@@ -41,17 +41,15 @@
                 foreach($result as $key=>$val){
 
                     if($filter == "nearby"){
-
                     }
 
                     if($filter = "favourite"){
-
                     }
-
-                    if(file_exists(LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image)){
-                        $result[$key]->img_url = base_url().LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image;
+                    $result[$key]->offer = "10% off";
+                    if(file_exists(shop_IMG_PATH.$val->image)){
+                        $result[$key]->image = base_url().shop_IMG_PATH.$val->image;
                     }else{
-                        $result[$key]->img_url = "";
+                        $result[$key]->image = "";
                     }
 
                     // =====================
@@ -99,32 +97,44 @@
         }
 
         public function get_laundries($per_page,$page_no,$search){
-            
-            $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
-            $this->db->from('laundries l');
-            $this->db->order_by('l.sort_order','ASC');
-            if($search != ""){
-                $this->db->like('l.name',$search);
-            }
-            $this->db->limit($per_page,$offset);
-            // $this->db->where('s.available','Y');
-            $query = $this->db->get();
 
-            $result = array();
-            if ($query->num_rows() > 0) {
-                $result = $query->result();
+             $offset = (int)$per_page * (int)$page_no;
+            $query = $this->db->select('id,name')->get('laundry_type');
+            $laundry_type=[];
+            $result = (object) array();
 
-                foreach($result as $key=>$val){
-                    if(file_exists(LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image)){
-                        $result[$key]->img_url = base_url().LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image;
-                    }else{
-                        $result[$key]->img_url = "";
-                    }
+                if ($query->num_rows() > 0) {
+                        $result = $query->result();
+                        foreach ($result as $key => $value) {
+                                $laundry_type[]= array('laundry_type_id' => $value->id, 'name' => $value->name);
+                                $this->db->where('lta.laundry_type_id',$value->id)
+                                        ->join('laundries l', 'lta.laundry_id = l.id')
+                                        ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
+                                if($search != ""){
+                                    $this->db->like('l.name',$search);
+                                }
+                                $this->db->limit($per_page,$offset);
+                                $query = $this->db->get('laundry_type_assign lta');
+                                if ($query->num_rows() > 0) {
+                                    $data=[];
+                                    foreach($query->result() as $keys=>$val){
+                                        if($val->image != ''){
+                                            $img = base_url().LAUNDRY_IMG_PATH.$val->image;
+                                        }else{
+                                            $img = "";
+                                        }
+
+                                        $data[] = array('id' => $val->id,'name' => $val->name,'arabic_name' => $val->arabic_name,'does_require_car' => $val->does_require_car,'specification' => $val->specification,'image' => $img, );
+                                    }
+                                    $result[$key]->items =$data ;
+                                }
+                        }
                 }
 
-            }
-            return $result;
+                $res['laundry_types']=$laundry_type;
+                $res['list']=$result;
+            return $res;
+      
         }
 
         public function get_capabilities($shop_id,$laundry_id){

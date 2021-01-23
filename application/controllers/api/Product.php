@@ -99,6 +99,18 @@ class Product extends REST_Controller
                     'rules' => 'required|numeric',
                     'errors' => [],
             ],
+             [
+                    'field' => 'latitude',
+                    'label' => 'latitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+             [
+                    'field' => 'longitude',
+                    'label' => 'longitude',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
         ];
 
         $data = $this->input->post();
