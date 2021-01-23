@@ -80,18 +80,27 @@
                             $img = base_url().shop_IMG_PATH.$val->image;
                         }else{  $img = ""; }
 
+                        // $favourite=$this->db->where('shop_id',$val->id)
+                        //                     ->where('shop_id',$val->id)
+                        //                     ->get('shop_favourite')
+                        //                     ->row();
+
+                        // print_r($favourite);
+                        // exit();
                          $shop_ratings = $this->db->where('shop_id',$val->id)
-                                    ->get('shop_ratings')->result();
-                                    $rate=0;  $no=0;
-                                    foreach ($shop_ratings as $key => $value) {
-                                        $rate += $value->rate;  $no++;
-                                    }
-                        $review_count= ($rate/$no);
+                            ->select('AVG(rate) as rate')
+                                    ->get('shop_ratings')->row();
+                         $rate='0';
+                         if ($shop_ratings && $shop_ratings->rate !='' ) {
+                            $rate=$shop_ratings->rate;
+                        }
+                                    
+                                   
                         $result[] = array('id' => $val->id,
                             'shop_name' => $val->shop_name,
                             'image' => $img,
                             'minimum_order' => $val->minimum_order,
-                            'review_count' => $review_count, );
+                            'review_count' => $rate, );
                     }
                 }
             return $result;
@@ -110,17 +119,17 @@
                         }else{  $img = ""; }
 
                          $shop_ratings = $this->db->where('shop_id',$val->id)
-                                    ->get('shop_ratings')->result();
-                                    $rate=0;  $no=0;
-                                    foreach ($shop_ratings as $key => $value) {
-                                        $rate += $value->rate;  $no++;
-                                    }
-                        $review_count= ($rate/$no);
+                            ->select('AVG(rate) as rate')
+                                    ->get('shop_ratings')->row();
+                         $rate='0';
+                         if ($shop_ratings && $shop_ratings->rate !='' ) {
+                            $rate=$shop_ratings->rate;
+                        }
                         $result[] = array('id' => $val->id,
                             'shop_name' => $val->shop_name,
                             'image' => $img,
                             'minimum_order' => $val->minimum_order,
-                            'review_count' => $review_count, );
+                            'review_count' => $rate, );
                     }
                 }
             return $result;
