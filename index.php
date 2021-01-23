@@ -363,5 +363,6 @@ define('RIDER_PRO', UPLOADS.'rider_profile/');
 define('ADBNR_PATH', UPLOADS.'ad_banner/');
 define('LAUNDRY_IMG_PATH', UPLOADS.'laundry/');
 define('CAPABILITY_IMG_PATH', UPLOADS.'capabilities/');
+define('shop_IMG_PATH', UPLOADS.'shop/');
 
 require_once BASEPATH.'core/CodeIgniter.php';

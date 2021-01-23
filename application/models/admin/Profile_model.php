@@ -19,12 +19,6 @@ class Profile_model extends CI_Model{
 	
 	function update_profile()
 	{
-                // echo "<pre>";
-                // print_r($_POST);
-                // print_r($_FILES);
-                // echo "</pre>";
-                // exit;
-
                 if(isset($_FILES['profile_pic']['name']) && $_FILES['profile_pic']['name'] != ""){
                         if(file_exists(PROFILE_PATH.$this->input->post('profile_pic_old')))
                         {

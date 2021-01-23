@@ -47,7 +47,8 @@
                     if($filter = "favourite"){
 
                     }
-
+                    print_r(LAUNDRY_IMG_PATH.$val->image);
+                    exit();
                     if(file_exists(LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image)){
                         $result[$key]->img_url = base_url().LAUNDRY_IMG_PATH.'thumb/120x120_'.$val->image;
                     }else{
