@@ -8,7 +8,8 @@
 
         public function get_ads(){
             $this->db->select('a.id,a.title,a.img');
-            $this->db->from('ads a');
+            $this->db->from('ads a')
+            ->limit(3);
             $this->db->where('a.status','Enable');
             $query = $this->db->get();
 
