@@ -93,10 +93,8 @@
 
             }
             return $result;
-
         }
-
-        public function get_laundries($per_page,$page_no,$search){
+        public function get_laundries($per_page,$page_no,$search,$shop_id){
 
              $offset = (int)$per_page * (int)$page_no;
             $query = $this->db->select('id,name')->get('laundry_type');
@@ -108,6 +106,8 @@
                         foreach ($result as $key => $value) {
                                 $laundry_type[]= array('laundry_type_id' => $value->id, 'name' => $value->name);
                                 $this->db->where('lta.laundry_type_id',$value->id)
+                                        ->where('ss.shop_id',$shop_id)
+                                        ->join('shop_services ss', 'lta.laundry_id = ss.laundry_id')
                                         ->join('laundries l', 'lta.laundry_id = l.id')
                                         ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
                                 if($search != ""){
@@ -115,6 +115,8 @@
                                 }
                                 $this->db->limit($per_page,$offset);
                                 $query = $this->db->get('laundry_type_assign lta');
+                                // print_r($query);
+                                // exit();
                                 if ($query->num_rows() > 0) {
                                     $data=[];
                                     foreach($query->result() as $keys=>$val){
@@ -174,10 +176,11 @@
             if ($query->num_rows() > 0) {
                 $result = $query->result();
                 foreach($result as $key=>$val){
-                    $cart_service = explode(',',$val->ss_ids);
+                    // $cart_service = explode(',',$val->ss_ids);
+                    $cart_service =$val->ss_ids;
 
-                    sort($cart_service);
-                    sort($service);
+                    // sort($cart_service);
+                    // sort($service);
 
                     if ($cart_service == $service){
                         $available = "Y";
@@ -201,7 +204,7 @@
             $query = $this->db->get();
             if ($query->num_rows() > 0) {
                 $result = $query->result();
-
+                echo "string";
                 $price = 0;
                 foreach($result as $key=>$val){
                     if($order_type == "standard"){
@@ -232,13 +235,9 @@
                 return false;
             }
 
-            $services_str = implode(',',$data['services']);
-
+            // $services_str = implode(',',$data['services']);
             if($cart_data = $this->check_item_available_into_cart($data['user_id'],$data['laundry_id'],$data['services'])){
-
-                // print_r($cart_data);
-                // exit;
-
+                
                 $cart_id = $cart_data->cart_id;
                 // $old_qty = $cart_data->qty;
                 // echo $data['qty'];
@@ -258,21 +257,24 @@
                     // exit;
                     $success = "Y";
                 }
-
             }else{
-                $cart_data = array();
-                $cart_data['user_id'] = $data['user_id'];
-                $cart_data['laundry_id'] = $data['laundry_id'];
-                $cart_data['qty'] = $data['qty'];
-                $cart_data['ss_ids'] = $services_str;
-                $cart_data['price'] = $price;
-                $cart_data['price_total'] = $data['qty'] * $price;
-                
-                if($this->db->insert('cart',$cart_data)){
-                    $success = "Y";
-                }
+               // foreach ($data['services'] as $key => $value) {
+                    $cart_data = array();
+                    $cart_data['user_id'] = $data['user_id'];
+                    $cart_data['laundry_id'] = $data['laundry_id'];
+                    $cart_data['qty'] = $data['qty'];
+                    $cart_data['ss_ids'] = $data['services'];
+                    $cart_data['price'] = $price;
+                    $cart_data['price_total'] = $data['qty'] * $price;
+                    
+                    if($this->db->insert('cart',$cart_data)){
+                        $success = "Y";
+                    }
+                // }
             }
 
+// echo "string";
+// exit();
             if($success == "Y"){
                 return true;
             }else{
@@ -898,9 +900,32 @@
                 return false;
             }
         }
-        
+        public function get_laundry($id)
+        {
+             $result['laundry_data'] = $this->db->where('id',$id)->select('id,name,arabic_name,image')->get('laundries')->row();
+                        if($result['laundry_data']->image){
+                            $result['laundry_data']->image = base_url().LAUNDRY_IMG_PATH.$result['laundry_data']->image;
+                        }else{
+                            $result['laundry_data']->image = "";
+                        }
 
-        
-        
+            $query = $this->db->where('ss.laundry_id',$id)
+                          ->join('capabilities', 'ss.capability_id = capabilities.id')
+                          ->select('ss.id,shop_id,ss.laundry_id,standard_amt,urgent_amt,name,arabic_name,image')
+                          ->get('shop_services ss');
+            $result['items'] = $query->result();
+                    foreach ($result['items'] as $key => $value) {
+                        if(!empty($value->image)){
+                            $result['items'][$key]->image = base_url().LAUNDRY_IMG_PATH.$value->image;
+                        }else{
+                            $result['items'][$key]->image = "";
+                        }
+                    }
+                $result['starch_level'] = $this->db->get('starch_level')->result();
+                $result['ironing_type'] = $this->db->get('ironing_type')->result();
+               
+           return $result;
+        }
+
     }
 ?>

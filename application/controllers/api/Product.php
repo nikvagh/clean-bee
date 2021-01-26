@@ -42,6 +42,11 @@ class Product extends REST_Controller
                     'rules' => 'required|numeric',
                     'errors' => [],
             ],
+             [
+                    'field' => 'shop_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
             [
                     'field' => 'page_number',
                     'label' => 'page_number',
@@ -69,7 +74,7 @@ class Product extends REST_Controller
             if(isset($_POST['search'])){
                 $search = $_POST['search'];
             }
-            $laundries = $this->product->get_laundries($_POST['per_page'],$_POST['page_number'],$search);
+            $laundries = $this->product->get_laundries($_POST['per_page'],$_POST['page_number'],$search,$_POST['shop_id']);
             $result['status'] = 200;
             $result['title'] = "Laundries list";
             $result['res'] = $laundries;
@@ -1087,6 +1092,17 @@ class Product extends REST_Controller
             $this->form_validation->set_message('chk_valid_email', 'Enter Valid Email');
             return false;
         }
+    }
+    public function get_laundry_get($id)
+    {
+       
+            if($request = $this->product->get_laundry($id)){
+                $result['status'] = 200;
+                $result['title'] = "Get Laundry.";
+                $result['res'] = $request;
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+       
     }
 
 }
