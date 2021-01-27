@@ -43,8 +43,8 @@
                         ->get('orders o')
                         ->result();
 
-            if (count($query) > 0) {
             $result = [];
+            if (count($query) > 0) {
                 foreach($query as $key=>$val){
 
                     $data = $this->db->where('order_id',$val->id)
@@ -65,8 +65,9 @@
                                         'order_items' =>  $order_items,
                                          );
                 }
-                return $result;
+                
             }
+                return $result;
         }
         public function freedelivery($id)
         {
@@ -74,8 +75,8 @@
                         ->limit(3)
                         ->get('shops')
                         ->result();
-                if (count($query) > 0) {
                     $result = [];
+                if (count($query) > 0) {
                     foreach($query as $key=>$val){
                         if(file_exists(shop_IMG_PATH.$val->image)){
                             $img = base_url().shop_IMG_PATH.$val->image;
@@ -116,8 +117,8 @@
                         ->limit(3)
                         ->get('shops')
                         ->result();
-                if (count($query) > 0) {
                     $result = [];
+                if (count($query) > 0) {
                     foreach($query as $key=>$val){
                         if(file_exists(shop_IMG_PATH.$val->image)){
                             $img = base_url().shop_IMG_PATH.$val->image;
