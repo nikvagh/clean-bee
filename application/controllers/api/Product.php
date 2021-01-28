@@ -570,6 +570,10 @@ class Product extends REST_Controller
                 'label' => 'vendor_id',
                 'rules' => 'required',
                 'errors' => [],
+            ],[
+                'field' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
             ]
         ];
 
@@ -587,7 +591,7 @@ class Product extends REST_Controller
             $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
-            if($discount = $this->product->check_discount_code($_POST['discount_code'],$_POST['vendor_id'])){
+            if($discount = $this->product->check_discount_code($_POST['discount_code'],$_POST['vendor_id'],$_POST['user_id'])){
                 $result['status'] = 200;
                 $result['title'] = "Discount Details";
                 $result['res'] = $discount;
@@ -1104,5 +1108,38 @@ class Product extends REST_Controller
             }
        
     }
+    public function get_checkout_post()
+    {
+         $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+                  
+        ];
 
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            if($request = $this->product->get_checkout($_POST['user_id'])){
+                $result['status'] = 200;
+                $result['title'] = "Request Added Successfully.";
+                $result['res'] = $request;
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
+        }
+    }
 }

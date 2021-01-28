@@ -193,7 +193,7 @@
             }
         }
 
-        public function update_profile($user_id,$firstname,$lastname,$email,$password){
+        public function update_profile($user_id,$firstname,$lastname,$email){
             $success = "N";
 
             $data_customers = array(
@@ -204,7 +204,7 @@
             );
             $data_user = array(
                 'email'=>$email,
-                'password'=>$password,
+                // 'password'=>$password,
                 // 'updated_at'=>$this->curr_date
             );
             $this->db->where('customer_id',$user_id);

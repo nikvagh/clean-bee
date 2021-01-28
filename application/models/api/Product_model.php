@@ -166,12 +166,11 @@
         public function check_item_available_into_cart($user_id,$laundry_id,$service){
 
             $available = "N";
-
             $this->db->select('c.id,c.qty,c.ss_ids');
             $this->db->where('c.user_id',$user_id);
             $this->db->where('c.laundry_id',$laundry_id);
             // $this->db->where('ss_ids',$service);
-            $this->db->from('cart c');
+            $this->db->from('product_cart c');
             $query = $this->db->get();
             if ($query->num_rows() > 0) {
                 $result = $query->result();
@@ -204,7 +203,6 @@
             $query = $this->db->get();
             if ($query->num_rows() > 0) {
                 $result = $query->result();
-                echo "string";
                 $price = 0;
                 foreach($result as $key=>$val){
                     if($order_type == "standard"){
@@ -239,10 +237,16 @@
             if($cart_data = $this->check_item_available_into_cart($data['user_id'],$data['laundry_id'],$data['services'])){
                 
                 $cart_id = $cart_data->cart_id;
-                // $old_qty = $cart_data->qty;
-                // echo $data['qty'];
-                // exit;
+
+               
                 $new_qty = (int)$cart_data->qty + (int)$data['qty'];
+
+                $old_cart = $this->db->where('user_id', $data['user_id'])->get('cart')->row();
+                $cart_data_cart = array();
+                $cart_data_cart['subtotal'] = $new_qty * $price;
+                $cart_data_cart['total'] = $old_cart->total+($data['qty'] * $price);
+                $this->db->where('user_id',$data['user_id']);
+                $this->db->update('cart',$cart_data_cart);
 
                 $cart_data = array();
                 $cart_data['qty'] = $new_qty;
@@ -252,29 +256,34 @@
                 $cart_data['updated_at'] = date('Y-m-d H:i:s');
 
                 $this->db->where('id',$cart_id);
-                if($this->db->update('cart',$cart_data)){
-                    // echo $this->db->last_query();
-                    // exit;
+                if($this->db->update('product_cart',$cart_data)){
                     $success = "Y";
                 }
             }else{
-               // foreach ($data['services'] as $key => $value) {
+                     
+                    $cart_data_cart = array();
+                    $cart_data_cart['user_id'] = $data['user_id'];
+                    $cart_data_cart['subtotal'] = $data['qty'] * $price;
+                    $cart_data_cart['discount'] = 0;
+                    $cart_data_cart['delivery_fees'] = 0;
+                    $cart_data_cart['total'] = $data['qty'] * $price;
+                     $this->db->insert('cart',$cart_data_cart);
+                     $cart= $this->db->insert_id();
+                    
                     $cart_data = array();
                     $cart_data['user_id'] = $data['user_id'];
+                    $cart_data['cart_id'] = $cart;
+                    $cart_data['order_type'] = $data['order_type'];
                     $cart_data['laundry_id'] = $data['laundry_id'];
                     $cart_data['qty'] = $data['qty'];
                     $cart_data['ss_ids'] = $data['services'];
                     $cart_data['price'] = $price;
                     $cart_data['price_total'] = $data['qty'] * $price;
-                    
-                    if($this->db->insert('cart',$cart_data)){
+
+                    if($this->db->insert('product_cart',$cart_data)){
                         $success = "Y";
                     }
-                // }
             }
-
-// echo "string";
-// exit();
             if($success == "Y"){
                 return true;
             }else{
@@ -293,6 +302,13 @@
             $cart_id = $data['cart_id'];
             $new_qty = (int)$data['qty'];
 
+            $old_cart = $this->db->where('user_id', $data['user_id'])->get('cart')->row();
+            $cart_data_cart = array();
+            $cart_data_cart['subtotal'] = $new_qty * $price;
+            $cart_data_cart['total'] = $old_cart->total+($data['qty'] * $price);
+            $this->db->where('user_id',$data['user_id']);
+            $this->db->update('cart',$cart_data_cart);
+
             $cart_data = array();
             $cart_data['qty'] = $new_qty;
             $cart_data['ss_ids'] = $services_str;
@@ -301,7 +317,7 @@
             $cart_data['updated_at'] = date('Y-m-d H:i:s');
 
             $this->db->where('id',$cart_id);
-            if($this->db->update('cart',$cart_data)){
+            if($this->db->update('product_cart',$cart_data)){
                 // echo $this->db->last_query();
                 // exit;
                 $success = "Y";
@@ -319,6 +335,11 @@
             if($cart_id != ""){
                 $this->db->where('id', $cart_id);
             }
+            $this->db->delete('product_cart');
+             $this->db->where('user_id', $user_id);
+            if($cart_id != ""){
+                $this->db->where('id', $cart_id);
+            }
             if ($query = $this->db->delete('cart')){
                 return true;
             }else{
@@ -329,7 +350,7 @@
         public function get_cart($user_id){
             $this->db->select('c.id,l.id as laundry_id,l.name as laundry,c.qty,c.ss_ids as capabilities,c.price,c.price_total');
             // $this->db->where_in('ss.id',$services);
-            $this->db->from('cart c');
+            $this->db->from('product_cart c');
             $this->db->join('laundries l','l.id = c.laundry_id','left');
             $this->db->where('c.user_id', $user_id);
             $query = $this->db->get();
@@ -425,17 +446,26 @@
             return $result;
         }
 
-        public function check_discount_code($discount_code,$vendor_id){
+        public function check_discount_code($discount_code,$vendor_id,$user_id){
             $this->db->select('d.id,d.name,d.discount_type,d.percentage,d.value,d.applied_to,d.expiry_date');
             $this->db->where('d.name',$discount_code);
             $this->db->where('d.expiry_date >=',$this->curr_date);
-            $this->db->where('find_in_set('.$vendor_id.',d.vendors) > 0');
+            $this->db->where('find_in_set('.$vendor_id.',d.vendor_id) > 0');
             $this->db->from('discounts d');
             $query = $this->db->get();
 
             $row = (object) array();
             if ($query->num_rows() > 0) {
                 $row = $query->row();
+                
+                $old_cart = $this->db->where('user_id', $user_id)->get('cart')->row();
+                $cart_data_cart = array();
+                $cart_data_cart['discount'] = $old_cart->discount + $row->value;
+                $cart_data_cart['total'] = $old_cart->total - $row->value;
+                // print_r($old_cart->total);
+                // exit();
+                $this->db->where('user_id',$user_id);
+                $this->db->update('cart',$cart_data_cart);
             }else{
                 $row = false;
             }
@@ -926,6 +956,31 @@
                
            return $result;
         }
+        public function get_checkout($user_id)
+        {
+            $result = array();
+            $this->db->where('user_id',$user_id);
+            $query1 = $this->db->get('cart')->row();
+            // print_r($query1->delivery_fees);
+            // exit();
+            $this->db->select('c.id,l.name as laundry_name,c.qty,c.price_total,c.price');
+            $this->db->where('c.user_id',$user_id);
+            $this->db->join('laundries l', 'c.laundry_id = l.id'); 
+            $query = $this->db->get('product_cart c');
 
+            $result['subtotal']=0;
+            $result['delivery fees']=0;
+            $result['discount']=0;
+            $result['total']=0;
+            $result['items']=[];
+            if ($query->num_rows() > 0) {
+                $result['subtotal'] = (int)$query1->subtotal;
+                $result['delivery_fees']=(int)$query1->delivery_fees;
+                $result['discount']=(int)$query1->discount;
+                $result['total'] = (int)$query1->total;
+                $result['items'] = $query->result();
+            }
+            return $result;
+        }
     }
 ?>

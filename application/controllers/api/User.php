@@ -1321,12 +1321,12 @@ class User extends REST_Controller
                     'rules' => 'required',
                     'errors' => [],
             ],
-            [
-                    'field' => 'password',
-                    'label' => 'password',
-                    'rules' => 'required|min_length[6]',
-                    'errors' => [],
-            ],
+            // [
+            //         'field' => 'password',
+            //         'label' => 'password',
+            //         'rules' => 'required|min_length[6]',
+            //         'errors' => [],
+            // ],
         ];
 
         $data = $this->input->post();
@@ -1343,7 +1343,7 @@ class User extends REST_Controller
             $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
-            if($this->user->update_profile($_POST['user_id'],$_POST['firstname'],$_POST['lastname'],$_POST['email'],$_POST['password'])){
+            if($this->user->update_profile($_POST['user_id'],$_POST['firstname'],$_POST['lastname'],$_POST['email'])){
                 $customer = $this->user->get_customer_by_id($_POST['user_id']);
                 $result['status'] = 200;
                 $result['title'] = "profile updated successfully";
