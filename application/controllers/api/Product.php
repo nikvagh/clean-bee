@@ -193,7 +193,7 @@ class Product extends REST_Controller
         }
     }
 
-    public function add_to_cart_post(){
+    public function add_to_cart_post(){       
         $this->token_check();
         // $_POST = json_decode($this->input->raw_input_stream,true);
         $_POST = $this->request->body;
@@ -236,9 +236,7 @@ class Product extends REST_Controller
         $data = $this->input->post();
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules($config);
-
-        if ($this->form_validation->run() == FALSE)
-        {
+        if ($this->form_validation->run() == FALSE){
             $result['status'] = 400;
             foreach($this->form_validation->error_array() as $key => $val){
                 $result['title'] = $val;

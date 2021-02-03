@@ -133,3 +133,33 @@ if (!function_exists('sent_otp')) {
 		// OTP sending function
 	}
 }
+if (!function_exists('set_cart_totel')){
+	function set_cart_totel($id)
+	{
+		$db =& get_instance();
+		$cart_data= $db->db->where('user_id',$id)->get('cart')->row();
+		$cart_pro_totel= $db->db->where('user_id',$id)->select('sum(price_total) as total')->get('cart_product')->row();
+
+ 		$total=$cart_pro_totel->total - ($cart_data->discount);
+        $cart_data_cart = array();
+        $cart_data_cart['subtotal'] = $cart_pro_totel->total;
+        $cart_data_cart['total'] = $total;
+        $db->db->where('user_id',$id);
+        $db->db->update('cart',$cart_data_cart);
+
+		return true;
+	}
+}
+if (!function_exists('check_cart_uesr')) {
+	function check_cart_uesr($id)
+	{
+		$db =& get_instance();
+		$cart_data= $db->db->where('user_id',$id)->get('cart')->row();
+		
+		if (empty($cart_data->id)) {
+			return false;
+		}else{
+			return $cart_data->id;
+		}
+	}
+}
