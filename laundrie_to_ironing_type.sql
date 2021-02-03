@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 23, 2021 at 11:34 AM
+-- Generation Time: Feb 03, 2021 at 11:11 AM
 -- Server version: 8.0.21
 -- PHP Version: 7.3.21
 
@@ -24,26 +24,24 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `laundry_type`
+-- Table structure for table `laundrie_to_ironing_type`
 --
 
-DROP TABLE IF EXISTS `laundry_type`;
-CREATE TABLE IF NOT EXISTS `laundry_type` (
+DROP TABLE IF EXISTS `laundrie_to_ironing_type`;
+CREATE TABLE IF NOT EXISTS `laundrie_to_ironing_type` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
+  `laundrie_id` int NOT NULL,
+  `ironing_type_id` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `laundry_type`
+-- Dumping data for table `laundrie_to_ironing_type`
 --
 
-INSERT INTO `laundry_type` (`id`, `name`, `created_at`, `updated_at`) VALUES
-(1, 'Traditional', '2021-01-23 15:34:10', '2021-01-23 15:34:10'),
-(2, 'Tops', '2021-01-23 15:34:10', '2021-01-23 15:34:10'),
-(3, 'Bottom', '2021-01-23 15:34:10', '2021-01-23 15:34:10');
+INSERT INTO `laundrie_to_ironing_type` (`id`, `laundrie_id`, `ironing_type_id`) VALUES
+(1, 1, 1),
+(2, 1, 2);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

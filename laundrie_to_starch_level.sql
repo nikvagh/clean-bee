@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 23, 2021 at 11:34 AM
+-- Generation Time: Feb 03, 2021 at 11:11 AM
 -- Server version: 8.0.21
 -- PHP Version: 7.3.21
 
@@ -24,30 +24,24 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `laundry_type_assign`
+-- Table structure for table `laundrie_to_starch_level`
 --
 
-DROP TABLE IF EXISTS `laundry_type_assign`;
-CREATE TABLE IF NOT EXISTS `laundry_type_assign` (
+DROP TABLE IF EXISTS `laundrie_to_starch_level`;
+CREATE TABLE IF NOT EXISTS `laundrie_to_starch_level` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `laundry_type_id` int NOT NULL,
-  `laundry_id` int NOT NULL,
+  `laundrie_id` int NOT NULL,
+  `starch_level_id` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `laundry_type_assign`
+-- Dumping data for table `laundrie_to_starch_level`
 --
 
-INSERT INTO `laundry_type_assign` (`id`, `laundry_type_id`, `laundry_id`) VALUES
+INSERT INTO `laundrie_to_starch_level` (`id`, `laundrie_id`, `starch_level_id`) VALUES
 (1, 1, 1),
-(2, 2, 2),
-(3, 2, 1),
-(4, 1, 3),
-(5, 3, 1),
-(6, 2, 3),
-(7, 1, 2),
-(8, 3, 3);
+(2, 1, 3);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
