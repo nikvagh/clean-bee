@@ -106,7 +106,8 @@
                             'minimum_order' => $val->minimum_order,
                             'review_count' => $rate,
                             'favourite' => $favourite,
-                            'offer'=> '10% off' );
+                            'per_off'=> 10,
+                            'get_qar'=> 30, );
                     }
                 }
             return $result;
@@ -146,7 +147,8 @@
                             'minimum_order' => $val->minimum_order,
                             'review_count' => $rate,
                             'favourite' => $favourite,
-                            'offer'=> '10% off');
+                            'per_off'=> 10,
+                            'get_qar'=> 30, );
                     }
                 }
             return $result;
