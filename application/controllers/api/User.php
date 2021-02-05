@@ -670,12 +670,12 @@ class User extends REST_Controller
                     'rules' => 'callback_office_required',
                     'errors' => [],
             ],
-             [
-                    'field' => 'apartment_number',
-                    'label' => 'apartment_number',
-                    'rules' => 'callback_apartment_required',
-                    'errors' => [],
-            ],
+            //  [
+            //         'field' => 'apartment_number',
+            //         'label' => 'apartment_number',
+            //         'rules' => 'callback_apartment_required',
+            //         'errors' => [],
+            // ],
         ];
 
             $data = $this->input->post();
@@ -704,6 +704,7 @@ class User extends REST_Controller
                 if (!empty($_POST['floor_number'])) {
                         $floor_number=$_POST['floor_number'];
                 }
+                
                 
 
                 if($this->user->add_address($_POST['user_id'],$_POST['building_number'],$_POST['longitude'],$_POST['latitude'],$_POST['address_type'],$_POST['street_name'],$_POST['area_zone'],$floor_number,$office_number,$apartment_number)){
