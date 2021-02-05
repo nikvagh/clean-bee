@@ -170,7 +170,7 @@ class User extends REST_Controller
         $config = [
             [
                     'field' => 'firstname',
-                    'label' => 'Firstname',
+                    'label' => 'firstname',
                     'rules' => 'required',
                     'errors' => [],
             ],
