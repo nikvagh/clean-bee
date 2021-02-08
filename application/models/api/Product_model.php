@@ -23,9 +23,7 @@
         public function get_shops($per_page,$page_no,$filter,$user_id){
 
             $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.minimum_order,s.image,
-                                IF(sf.id > 0, "true", "false") as favourite');
-            $this->db->join('shop_favourite sf','sf.shop_id = s.id AND sf.user_id='.$user_id,'left');
+            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.minimum_order,s.image');
             // $this->db->join('shop_services ss','ss.shop_id = s.id','left');
             // $this->db->join('capabilities c','c.id = ss.capability_id','left');
             $this->db->from('shops s');
@@ -40,12 +38,21 @@
 
                 foreach($result as $key=>$val){
 
+                    $result[$key]->favourite = false;
+                    $favourite = $this->db->where('shop_id',$val->id)->where('user_id',$user_id)->get('shop_favourite')->row();
+                    if($favourite){
+                        $result[$key]->favourite = true;
+                    }
+
                     if($filter == "nearby"){
                     }
 
                     if($filter = "favourite"){
                     }
-                    $result[$key]->offer = "10% off";
+
+                    $result[$key]->offer = '10';
+                    $result[$key]->get_qar = '10';
+                    $result[$key]->km = '5';
                     if(file_exists(shop_IMG_PATH.$val->image)){
                         $result[$key]->image = base_url().shop_IMG_PATH.$val->image;
                     }else{
@@ -53,27 +60,27 @@
                     }
 
                     // =====================
-                    $this->db->select('c.id,c.name,c.arabic_name,c.image');
-                    $this->db->from('shop_services ss');
-                    $this->db->join('capabilities c','c.id=ss.capability_id','left');
-                    $this->db->where('ss.shop_id',$val->id);
-                    $this->db->group_by('ss.capability_id');
-                    $query2 = $this->db->get();
+                    // $this->db->select('c.id,c.name,c.arabic_name,c.image');
+                    // $this->db->from('shop_services ss');
+                    // $this->db->join('capabilities c','c.id=ss.capability_id','left');
+                    // $this->db->where('ss.shop_id',$val->id);
+                    // $this->db->group_by('ss.capability_id');
+                    // $query2 = $this->db->get();
 
-                    $result2 = array();
-                    if ($query2->num_rows() > 0) {
-                        $result2 = $query2->result();
-                        foreach($result2 as $key2=>$val2){
+                    // $result2 = array();
+                    // if ($query2->num_rows() > 0) {
+                    //     $result2 = $query2->result();
+                    //     foreach($result2 as $key2=>$val2){
 
-                            if(file_exists(CAPABILITY_IMG_PATH.'thumb/120x120_'.$val2->image)){
-                                $result2[$key2]->img_url = base_url().CAPABILITY_IMG_PATH.'thumb/120x120_'.$val2->image;
-                            }else{
-                                $result2[$key2]->img_url = "";
-                            }
+                    //         if(file_exists(CAPABILITY_IMG_PATH.'thumb/120x120_'.$val2->image)){
+                    //             $result2[$key2]->img_url = base_url().CAPABILITY_IMG_PATH.'thumb/120x120_'.$val2->image;
+                    //         }else{
+                    //             $result2[$key2]->img_url = "";
+                    //         }
                             
-                        }
-                    }
-                    $result[$key]->capabilities = $result2;
+                    //     }
+                    // }
+                    // $result[$key]->capabilities = $result2;
 
                     // =====================
                     $this->db->select('AVG(rate) as rate');
@@ -94,49 +101,47 @@
             }
             return $result;
         }
-        public function get_laundries($per_page,$page_no,$search,$shop_id){
 
-             $offset = (int)$per_page * (int)$page_no;
+        public function get_laundries($shop_id,$per_page="",$page_no="",$search){
+            // $offset = (int)$per_page * (int)$page_no;
             $query = $this->db->select('id,name')->get('laundry_type');
             $laundry_type=[];
             $result = (object) array();
 
-                if ($query->num_rows() > 0) {
-                        $result = $query->result();
-                        foreach ($result as $key => $value) {
-                                $laundry_type[]= array('laundry_type_id' => $value->id, 'name' => $value->name);
-                                $this->db->where('lta.laundry_type_id',$value->id)
-                                        ->where('ss.shop_id',$shop_id)
-                                        ->join('shop_services ss', 'lta.laundry_id = ss.laundry_id')
-                                        ->join('laundries l', 'lta.laundry_id = l.id')
-                                        ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
-                                if($search != ""){
-                                    $this->db->like('l.name',$search);
-                                }
-                                $this->db->limit($per_page,$offset);
-                                $query = $this->db->get('laundry_type_assign lta');
-                                // print_r($query);
-                                // exit();
-                                if ($query->num_rows() > 0) {
-                                    $data=[];
-                                    foreach($query->result() as $keys=>$val){
-                                        if($val->image != ''){
-                                            $img = base_url().LAUNDRY_IMG_PATH.$val->image;
-                                        }else{
-                                            $img = "";
-                                        }
-
-                                        $data[] = array('id' => $val->id,'name' => $val->name,'arabic_name' => $val->arabic_name,'does_require_car' => $val->does_require_car,'specification' => $val->specification,'image' => $img, );
+            if ($query->num_rows() > 0) {
+                    $result = $query->result();
+                    foreach ($result as $key => $value) {
+                            $laundry_type[]= array('laundry_type_id' => $value->id, 'name' => $value->name);
+                            $this->db->where('lta.laundry_type_id',$value->id)
+                                    ->where('l.shop_id',$shop_id)
+                                    ->join('laundries l', 'lta.laundry_id = l.id')
+                                    ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
+                            if($search != ""){
+                                $this->db->like('l.name',$search);
+                            }
+                            // $this->db->limit($per_page,$offset);
+                            $query = $this->db->group_by('l.id')->get('laundry_type_assign lta');
+                            // print_r($query);
+                            // exit();
+                            if ($query->num_rows() > 0) {
+                                $data=[];
+                                foreach($query->result() as $keys=>$val){
+                                    if($val->image != ''){
+                                        $img = base_url().LAUNDRY_IMG_PATH.$val->image;
+                                    }else{
+                                        $img = "";
                                     }
-                                    $result[$key]->items =$data ;
-                                }
-                        }
-                }
 
-                $res['laundry_types']=$laundry_type;
-                $res['list']=$result;
+                                    $data[] = array('id' => $val->id,'name' => $val->name,'arabic_name' => $val->arabic_name,'does_require_car' => $val->does_require_car,'specification' => $val->specification,'image' => $img, );
+                                }
+                                $result[$key]->items =$data ;
+                            }
+                    }
+            }
+
+            $res['laundry_types'] = $laundry_type;
+            $res['list'] = $result;
             return $res;
-      
         }
 
         public function get_capabilities($shop_id,$laundry_id){
@@ -261,7 +266,7 @@
                 }
             }else{
                     
-                if (!$cart_insert_id=check_cart_uesr($data['user_id'])) {
+                    if (!$cart_insert_id = check_cart_uesr($data['user_id'])) {
                         $cart_data_cart = array();
                         $cart_data_cart['user_id'] = $data['user_id'];
                         $cart_data_cart['delivery_fees'] = 0;
@@ -269,8 +274,9 @@
                         $cart_data_cart['subtotal'] = 0;
                         $cart_data_cart['total'] = 0;
                         $this->db->insert('cart',$cart_data_cart);
-                         $cart_insert_id = $this->db->insert_id();
+                        $cart_insert_id = $this->db->insert_id();
                     }
+
                     $cart_data = array();
                     $cart_data['user_id'] = $data['user_id'];
                     $cart_data['cart_id'] = $cart_insert_id;
@@ -285,6 +291,7 @@
                         $success = "Y";
                     }
             }
+
             set_cart_totel($data['user_id']);
             if($success == "Y"){
                 return true;
@@ -742,10 +749,6 @@
             return $result;
         }
 
-        public function get_laundry_by_id(){
-
-        }
-
         public function reorder_order($user_id,$order_id){
 
             $this->remove_from_cart($user_id,'');
@@ -929,40 +932,46 @@
                 return false;
             }
         }
+
         public function get_laundry($id)
         {
-             $result['laundry_data'] = $this->db->where('id',$id)->select('id,name,arabic_name,image')->get('laundries')->row();
-                        if($result['laundry_data']->image){
-                            $result['laundry_data']->image = base_url().LAUNDRY_IMG_PATH.$result['laundry_data']->image;
-                        }else{
-                            $result['laundry_data']->image = "";
-                        }
-            $result['ironing_type']=[];
-            $result['starch_level']=[];
-            $query = $this->db->where('ss.laundry_id',$id)
-                          ->join('capabilities', 'ss.capability_id = capabilities.id')
-                          ->select('ss.id,shop_id,ss.laundry_id,standard_amt,urgent_amt,name,arabic_name,image')
-                          ->get('shop_services ss');
-            $result['items'] = $query->result();
-                    foreach ($result['items'] as $key => $value) {
-                        if(!empty($value->image)){
-                            $result['items'][$key]->image = base_url().LAUNDRY_IMG_PATH.$value->image;
-                        }else{
-                            $result['items'][$key]->image = "";
-                        }
-                    }
-                $result['starch_level'] = $this->db->where('laundrie_id',$id)
-                                        ->join('starch_level as sl', 'sl.id = lsl.starch_level_id')
-                                        ->select('sl.id,name')
-                                        ->get('laundrie_to_starch_level as lsl')->result();
+            $result = $this->db->where('id',$id)->select('id,name,arabic_name,image')->get('laundries')->row();
+            if($result->image){
+                $result->image = base_url().LAUNDRY_IMG_PATH.$result->image;
+            }else{
+                $result->image = "";
+            }
 
-                $result['ironing_type'] = $this->db->where('laundrie_id',$id)
-                                        ->join('ironing_type as iy', 'iy.id = lit.ironing_type_id')
-                                        ->select('iy.id,name')
-                                        ->get('laundrie_to_ironing_type as lit')->result();
-               
-           return $result;
+            $query = $this->db->from('laundry_to_capabilities ltc')
+                        ->join('capabilities c', 'ltc.capability_id = c.id','left')
+                        ->select('ltc.id as laundry_capability_id,standard_amt,urgent_amt,c.name,c.arabic_name')
+                        ->where('ltc.laundry_id',$id)
+                        ->get();
+            $result->items = $query->result();
+            // foreach ($result->items as $key => $value) {
+            //     if(!empty($value->image)){
+            //         $result->items[$key]->image = base_url().LAUNDRY_IMG_PATH.$value->image;
+            //     }else{
+            //         $result->items[$key]->image = "";
+            //     }
+            // }
+
+            $result->ironing_type = [];
+            $result->starch_level = [];
+
+            $result->starch_level = $this->db->from('laundry_to_starch_level lts')
+                                    ->join('starch_level sl', 'sl.id = lts.starch_level_id','left')
+                                    ->select('sl.id,sl.name')
+                                    ->where('lts.laundry_id',$id)->get()->result();
+
+            $result->ironing_type = $this->db->from('laundry_to_ironing_type lti')
+                                    ->join('ironing_type it', 'it.id = lti.ironing_type_id','left')
+                                    ->select('it.id,it.name')
+                                    ->where('lti.laundry_id',$id)->get()->result();
+                                    
+            return $result;
         }
+
         public function get_checkout($user_id)
         {
             $result = array();

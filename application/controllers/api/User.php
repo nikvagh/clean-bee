@@ -1003,17 +1003,19 @@ class User extends REST_Controller
 
         }else{
             $data = array('customer_id' => $_POST['user_id'],
-                                'name' => $_POST['name'],
-                                'card_number' => $_POST['card_number'],
-                                'expiry_date' => $_POST['expiry_date'].'-01',
-                                'cvv' => $_POST['cvv'],
-                                'created_at' => date('Y-m-d h:i:s'),
-                                'updated_at' => date('Y-m-d h:i:s'),
-                             );
+                            'name' => $_POST['name'],
+                            'card_number' => $_POST['card_number'],
+                            'expiry_date' => $_POST['expiry_date'].'-01',
+                            'cvv' => $_POST['cvv'],
+                            'created_at' => date('Y-m-d h:i:s'),
+                            'updated_at' => date('Y-m-d h:i:s'),
+                        );
             if($this->user->add_card($data)){
+                $card_id = $this->db->insert_id();
+                $card_data = $this->db->where('id',$card_id)->get('card')->row();
                 $result['status'] = 200;
                 $result['title'] = "Card Insert Successfully";
-                $result['res'] =$data;
+                $result['res'] = $card_data;
                 $this->response($result, REST_Controller::HTTP_OK);
             }
         }

@@ -36,23 +36,23 @@ class Product extends REST_Controller
         $this->token_check();
 
         $config = [
+            // [
+            //         'field' => 'per_page',
+            //         'label' => 'per_page',
+            //         'rules' => 'required|numeric',
+            //         'errors' => [],
+            // ],
             [
-                    'field' => 'per_page',
-                    'label' => 'per_page',
-                    'rules' => 'required|numeric',
-                    'errors' => [],
-            ],
-             [
                     'field' => 'shop_id',
                     'rules' => 'required',
                     'errors' => [],
             ],
-            [
-                    'field' => 'page_number',
-                    'label' => 'page_number',
-                    'rules' => 'required|numeric',
-                    'errors' => [],
-            ]
+            // [
+            //         'field' => 'page_number',
+            //         'label' => 'page_number',
+            //         'rules' => 'required|numeric',
+            //         'errors' => [],
+            // ]
         ];
 
         $data = $this->input->post();
@@ -74,7 +74,7 @@ class Product extends REST_Controller
             if(isset($_POST['search'])){
                 $search = $_POST['search'];
             }
-            $laundries = $this->product->get_laundries($_POST['per_page'],$_POST['page_number'],$search,$_POST['shop_id']);
+            $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search);
             $result['status'] = 200;
             $result['title'] = "Laundries list";
             $result['res'] = $laundries;
@@ -213,12 +213,12 @@ class Product extends REST_Controller
                     'rules' => 'required',
                     'errors' => [],
             ],
-            [
-                    'field' => 'qty',
-                    'label' => 'qty',
-                    'rules' => 'required|numeric',
-                    'errors' => [],
-            ],
+            // [
+            //         'field' => 'qty',
+            //         'label' => 'qty',
+            //         'rules' => 'required|numeric',
+            //         'errors' => [],
+            // ],
             [
                     'field' => 'order_type',
                     'label' => 'order_type',
@@ -1095,17 +1095,17 @@ class Product extends REST_Controller
             return false;
         }
     }
+
     public function get_laundry_get($id)
     {
-       
-            if($request = $this->product->get_laundry($id)){
-                $result['status'] = 200;
-                $result['title'] = "Get Laundry.";
-                $result['res'] = $request;
-                $this->response($result, REST_Controller::HTTP_OK);
-            }
-       
+        if($request = $this->product->get_laundry($id)){
+            $result['status'] = 200;
+            $result['title'] = "Laundry";
+            $result['res'] = $request;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
     }
+
     public function get_checkout_post()
     {
          $this->token_check();

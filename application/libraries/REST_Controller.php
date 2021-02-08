@@ -2421,7 +2421,7 @@ abstract class REST_Controller extends CI_Controller {
         if($err == "Y"){
             $result['status'] = 401;
             $result['title'] = "Invalid Auth";
-            $result['res'] = (object) array();
+            // $result['res'] = (object) array();
             
             $this->response($result, REST_Controller::HTTP_UNAUTHORIZED);
             exit;
