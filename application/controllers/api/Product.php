@@ -32,54 +32,9 @@ class Product extends REST_Controller
         $this->response($result, REST_Controller::HTTP_OK);
     }
 
-    public function get_laundries_post(){
-        $this->token_check();
-
-        $config = [
-            // [
-            //         'field' => 'per_page',
-            //         'label' => 'per_page',
-            //         'rules' => 'required|numeric',
-            //         'errors' => [],
-            // ],
-            [
-                    'field' => 'shop_id',
-                    'rules' => 'required',
-                    'errors' => [],
-            ],
-            // [
-            //         'field' => 'page_number',
-            //         'label' => 'page_number',
-            //         'rules' => 'required|numeric',
-            //         'errors' => [],
-            // ]
-        ];
-
-        $data = $this->input->post();
-        $this->form_validation->set_data($data);
-        $this->form_validation->set_rules($config);
-
-        if ($this->form_validation->run() == FALSE)
-        {
-            $result['status'] = 400;
-            foreach($this->form_validation->error_array() as $key => $val){
-                $result['title'] = $val;
-                break;
-            }
-            $result['res'] = [];
-            $this->response($result, REST_Controller::HTTP_OK);
-
-        }else{
-            $search = "";
-            if(isset($_POST['search'])){
-                $search = $_POST['search'];
-            }
-            $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search);
-            $result['status'] = 200;
-            $result['title'] = "Laundries list";
-            $result['res'] = $laundries;
-            $this->response($result, REST_Controller::HTTP_OK);
-        }
+    public function shop_filter_option_get(){
+        $shop_filter_option = SHOP_FILTER_OPTION;
+        $this->response(['status' => 200, 'title' => 'Shop filter option','res' => $shop_filter_option], REST_Controller::HTTP_OK);
     }
 
     public function get_shops_post(){
@@ -136,19 +91,137 @@ class Product extends REST_Controller
             $filter = "";
             if(isset($_POST['filter']) && $_POST['filter']){
                 $filter = $_POST['filter'];
-                if($_POST['filter'] != "all" && $_POST['filter'] != "favourite" && $_POST['filter'] != "nearby"){
-                    $result['status'] = 400;
-                    $result['title'] = "Filter values must be all,favourite or nearby";
-                    $result['res'] = [];
-                    $this->response($result, REST_Controller::HTTP_OK);
-                }
+                // if($_POST['filter'] != "all" && $_POST['filter'] != "favourite" && $_POST['filter'] != "nearby"){
+                //     $result['status'] = 400;
+                //     $result['title'] = "Filter values must be all,favourite or nearby";
+                //     $result['res'] = [];
+                //     $this->response($result, REST_Controller::HTTP_OK);
+                // }
             }
 
-            $shops = $this->product->get_shops($_POST['per_page'],$_POST['page_number'],$filter,$_POST['user_id']);
+            $search = "";
+            if(isset($_POST['search']) && $_POST['search']){
+                $search = $_POST['search'];
+            }
+
+            $shops = $this->product->get_shops($_POST['latitude'],$_POST['longitude'],$_POST['per_page'],$_POST['page_number'],$filter,$_POST['user_id'],$search);
             
             $result['status'] = 200;
             $result['title'] = "Shops list";
             $result['res'] = $shops;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function laundry_filter_option_get(){
+        $filter = $this->db->select('id,name')->get('laundry_type')->result();
+        $this->response(['status' => 200, 'title' => 'laundry filter option','res' => $filter], REST_Controller::HTTP_OK);
+    }
+
+    public function get_laundries_post(){
+        $this->token_check();
+
+        $config = [
+            // [
+            //         'field' => 'per_page',
+            //         'label' => 'per_page',
+            //         'rules' => 'required|numeric',
+            //         'errors' => [],
+            // ],
+            [
+                    'field' => 'shop_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            // [
+            //         'field' => 'page_number',
+            //         'label' => 'page_number',
+            //         'rules' => 'required|numeric',
+            //         'errors' => [],
+            // ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {   
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            $search = "";
+            if(isset($_POST['search'])){
+                $search = $_POST['search'];
+            }
+
+            $filter = "";
+            if(isset($_POST['filter']) && $_POST['filter']){
+                $filter = $_POST['filter'];
+                // if($_POST['filter'] != "all" && $_POST['filter'] != "favourite" && $_POST['filter'] != "nearby"){
+                //     $result['status'] = 400;
+                //     $result['title'] = "Filter values must be all,favourite or nearby";
+                //     $result['res'] = [];
+                //     $this->response($result, REST_Controller::HTTP_OK);
+                // }
+            }
+
+            $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search,$filter);
+            $result['status'] = 200;
+            $result['title'] = "Laundries list";
+            $result['res'] = $laundries;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+    }
+
+    // public function laundry_filter_option_get(){
+    //     $shop_filter_option = SHOP_FILTER_OPTION;
+    //     $this->response(['status' => 200, 'title' => 'Shop filter option','res' => $shop_filter_option], REST_Controller::HTTP_OK);
+    // }
+
+    public function get_laundry_post()
+    {
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'laundry_id',
+                'rules' => 'required'
+            ],
+            [
+                'field' => 'order_type',
+                'rules' => 'required'
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+
+        if($_POST['order_type'] != "standard" && $_POST['order_type'] != "urgent"){
+            $result['status'] = 400;
+            $result['title'] = 'order_type must be standard or urgent';
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
+
+        if($request = $this->product->get_laundry($_POST['laundry_id'],$_POST['order_type'])){
+            $result['status'] = 200;
+            $result['title'] = "Laundry details";
+            $result['res'] = $request;
             $this->response($result, REST_Controller::HTTP_OK);
         }
     }
@@ -193,7 +266,7 @@ class Product extends REST_Controller
         }
     }
 
-    public function add_to_cart_post(){       
+    public function add_to_cart_post(){
         $this->token_check();
         // $_POST = json_decode($this->input->raw_input_stream,true);
         $_POST = $this->request->body;
@@ -236,38 +309,34 @@ class Product extends REST_Controller
         $data = $this->input->post();
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules($config);
+
         if ($this->form_validation->run() == FALSE){
             $result['status'] = 400;
             foreach($this->form_validation->error_array() as $key => $val){
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
             if(empty($_POST['services'])){
                 $result['status'] = 310;
                 $result['title'] = "Select atleast one service";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
             if($_POST['order_type'] != "standard" && $_POST['order_type'] != "urgent"){
                 $result['status'] = 320;
-                $result['title'] = "Select atleast one service";
-                $result['res'] = (object) array();
+                $result['title'] = "order_type must be standard or urgent";
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
             if($this->product->add_to_cart($_POST)){
                 $result['status'] = 200;
                 $result['title'] = "Cart data updated successfully";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }else{
                 $result['status'] = 330;
                 $result['title'] = "Add to cart failed. please try again";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
         }
@@ -434,13 +503,11 @@ class Product extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }else{
             if($_POST['action'] != "add" && $_POST['action'] != "remove"){
                 $result['status'] = 320;
                 $result['title'] = "Action value must be add or remove";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
@@ -456,8 +523,6 @@ class Product extends REST_Controller
                 $result['status'] = 200;
                 $result['title'] = "Shop removed from your favourite list";
             }
-
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
         }
     }
@@ -1086,29 +1151,9 @@ class Product extends REST_Controller
         }
     }
 
-    public function chk_valid_email()
-    {
-        if(filter_var($this->input->post('email'), FILTER_VALIDATE_EMAIL)){
-            return true;
-        }else{
-            $this->form_validation->set_message('chk_valid_email', 'Enter Valid Email');
-            return false;
-        }
-    }
-
-    public function get_laundry_get($id)
-    {
-        if($request = $this->product->get_laundry($id)){
-            $result['status'] = 200;
-            $result['title'] = "Laundry";
-            $result['res'] = $request;
-            $this->response($result, REST_Controller::HTTP_OK);
-        }
-    }
-
     public function get_checkout_post()
     {
-         $this->token_check();
+        $this->token_check();
         $config = [
             [
                 'field' => 'user_id',
@@ -1138,6 +1183,16 @@ class Product extends REST_Controller
                 $result['res'] = $request;
                 $this->response($result, REST_Controller::HTTP_OK);
             }
+        }
+    }
+
+    public function chk_valid_email()
+    {
+        if(filter_var($this->input->post('email'), FILTER_VALIDATE_EMAIL)){
+            return true;
+        }else{
+            $this->form_validation->set_message('chk_valid_email', 'Enter Valid Email');
+            return false;
         }
     }
 }

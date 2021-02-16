@@ -94,6 +94,16 @@
             return $row;
         }
 
+        public function get_cards_list($user_id){
+            $cards = $this->db->from('card c')->select('c.id as card_id,c.name,c.card_number,c.expiry_date,c.cvv,c.default')
+                        ->where('c.customer_id',$user_id)->get()->result();
+
+            foreach($cards as $key=>$val){
+                $cards[$key]->expiry_date = date('Y-m',strtotime($val->expiry_date));
+            }
+            return $cards;
+        }
+
         public function get_notification_by_user_id($user_id){
             $this->db->select('n.id,n.user_id,n.title,n.message,n.is_new,n.created_at');
             $this->db->from('notifications n');

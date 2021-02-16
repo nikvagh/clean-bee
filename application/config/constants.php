@@ -83,3 +83,19 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+
+$shop_filter_option = [
+                        [ 'id'=> 1,'name' => 'Rating'],
+                        [ 'id'=> 2,'name' => 'Favourite'],
+                        [ 'id'=> 3,'name' => 'Nearby'],
+                        [ 'id'=> 4,'name' => 'Promotions'],
+                        [ 'id'=> 5,'name' => 'Delivery by', 
+                            'from' => [
+                                    [ 'id'=> 6,'name' => 'CleanBee'],
+                                    [ 'id'=> 7,'name' => 'Shop']
+                            ]
+                        ],
+                    ];
+
+define('SHOP_FILTER_OPTION',$shop_filter_option);

@@ -1,5 +1,8 @@
 <?php
-    class Product_model extends CI_Model{
+
+use GrahamCampbell\ResultType\Result;
+
+class Product_model extends CI_Model{
         function __construct(){
             parent::__construct();
             // $this->table='users';
@@ -20,39 +23,73 @@
             return $result;
         }
 
-        public function get_shops($per_page,$page_no,$filter,$user_id){
+        public function get_shops($latitude,$longitude,$per_page,$page_no,$filter,$user_id,$search){
 
+            $maximum_nearby_km = $this->system->maximum_nearby_km;
+            
             $offset = (int)$per_page * (int)$page_no;
-            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.minimum_order,s.image');
+            $this->db->select('s.id,s.shop_name,s.phone,s.description,s.opening_time,s.closing_time,s.latitude,s.longitude,s.address,s.delivery_fee,s.minimum_order,s.image,s.offer');
             // $this->db->join('shop_services ss','ss.shop_id = s.id','left');
             // $this->db->join('capabilities c','c.id = ss.capability_id','left');
             $this->db->from('shops s');
             $this->db->group_by('s.id');
             $this->db->limit($per_page,$offset);
+            if($search != ""){
+                $this->db->like('s.shop_name',$search);
+            }
+
+            if($filter == 4){
+                // Promotions
+                $this->db->where('s.offer','>', 0);
+            }
+
+            if($filter == 6){
+                // Delivery by Clean Bee
+                $this->db->where('s.delivery_by','CleanBee');
+            }
+
+            if($filter == 7){
+                // Delivery by Shop
+                $this->db->where('s.delivery_by','Shop');
+            }
+
             // $this->db->where('s.available','Y');
             $query = $this->db->get();
 
-            $result = array();
+            $res = array();
             if ($query->num_rows() > 0) {
                 $result = $query->result();
 
                 foreach($result as $key=>$val){
 
-                    $result[$key]->favourite = false;
-                    $favourite = $this->db->where('shop_id',$val->id)->where('user_id',$user_id)->get('shop_favourite')->row();
-                    if($favourite){
-                        $result[$key]->favourite = true;
+                    if($filter == 1){
+                        // rating
                     }
 
-                    if($filter == "nearby"){
+                    $favourite = false;
+                    $favourite_q = $this->db->where('shop_id',$val->id)->where('user_id',$user_id)->get('shop_favourite')->row();
+                    if($favourite_q){
+                        $favourite = true;
                     }
 
-                    if($filter = "favourite"){
+                    $result[$key]->favourite = $favourite;
+                    if($filter == 2){
+                        // Favourite
+                        if(!$favourite){
+                            continue;
+                        }
                     }
 
-                    $result[$key]->offer = '10';
+                    $km = radius_distance($latitude,$longitude,$val->latitude,$val->longitude);
+                    $result[$key]->km = $km;
+                    if($filter == 3){
+                        // Nearby
+                        if($km > $maximum_nearby_km){
+                            continue;
+                        }
+                    }
+
                     $result[$key]->get_qar = '10';
-                    $result[$key]->km = '5';
                     if(file_exists(shop_IMG_PATH.$val->image)){
                         $result[$key]->image = base_url().shop_IMG_PATH.$val->image;
                     }else{
@@ -96,51 +133,54 @@
 
                     $result[$key]->rating =  number_format($result3,2,".","");
 
+                    $res[] = $result[$key];
                 }
 
             }
-            return $result;
+            return $res;
         }
 
-        public function get_laundries($shop_id,$per_page="",$page_no="",$search){
+        public function get_laundries($shop_id,$per_page="",$page_no="",$search,$filter){
             // $offset = (int)$per_page * (int)$page_no;
-            $query = $this->db->select('id,name')->get('laundry_type');
-            $laundry_type=[];
-            $result = (object) array();
+            // $query = $this->db->select('id,name')->get('laundry_type');
 
-            if ($query->num_rows() > 0) {
-                    $result = $query->result();
-                    foreach ($result as $key => $value) {
-                            $laundry_type[]= array('laundry_type_id' => $value->id, 'name' => $value->name);
-                            $this->db->where('lta.laundry_type_id',$value->id)
-                                    ->where('l.shop_id',$shop_id)
-                                    ->join('laundries l', 'lta.laundry_id = l.id')
-                                    ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
-                            if($search != ""){
-                                $this->db->like('l.name',$search);
+            $list = $this->db->from('laundry_type_assign lta')
+                            ->join('laundries l','l.id = lta.laundry_id','left')
+                            ->join('laundry_type lt','lt.id = lta.laundry_type_id','left')
+                            ->select('lt.id,lt.name');
+                            if(!empty($filter)){
+                                $list = $this->db->where_in('lt.id',$filter);
                             }
-                            // $this->db->limit($per_page,$offset);
-                            $query = $this->db->group_by('l.id')->get('laundry_type_assign lta');
-                            // print_r($query);
-                            // exit();
-                            if ($query->num_rows() > 0) {
-                                $data=[];
-                                foreach($query->result() as $keys=>$val){
-                                    if($val->image != ''){
-                                        $img = base_url().LAUNDRY_IMG_PATH.$val->image;
-                                    }else{
-                                        $img = "";
-                                    }
+                            $list = $list->where('l.shop_id',$shop_id)->get()->result();
 
-                                    $data[] = array('id' => $val->id,'name' => $val->name,'arabic_name' => $val->arabic_name,'does_require_car' => $val->does_require_car,'specification' => $val->specification,'image' => $img, );
+            $laundry_types = [];
+            foreach($list as $key=>$val){
+
+                $laundry_types[] = ["laundry_type_id"=>$val->id,"name"=>$val->name];
+                $laundries = $this->db->from('laundry_type_assign lta')
+                                ->join('laundries l', 'lta.laundry_id = l.id')
+                                ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
+                                if($search != ""){
+                                    $laundries = $this->db->like('l.name',$search);
                                 }
-                                $result[$key]->items =$data ;
-                            }
+                                
+                                $laundries = $this->db->where('l.shop_id',$shop_id)->group_by('l.id')->get()->result();
+
+                foreach($laundries as $key1=>$val1){
+                    if($val1->image != ''){
+                        $img = base_url().LAUNDRY_IMG_PATH.$val1->image;
+                    }else{
+                        $img = "";
                     }
+                    $laundries[$key1]->img = $img;
+                }
+
+                $list[$key]->items = $laundries;
+
             }
 
-            $res['laundry_types'] = $laundry_type;
-            $res['list'] = $result;
+            $res['laundry_types'] = $laundry_types;
+            $res['list'] = $list;
             return $res;
         }
 
@@ -230,69 +270,83 @@
         }
 
         public function add_to_cart($data){
-
-            // print_r($data);
             $success = "N";
-            if($price = $this->get_price_by_services($data['services'],$data['order_type'],$data['qty'])){
+            $order_type = $data['order_type'];
+            $user_id = $data['user_id'];
 
+            $cart = $this->db->where('user_id',$user_id)->get('cart')->row();
+            if($cart){
+                $cart_id = $cart->id;
             }else{
-                return false;
+                $cartD = array();
+                $cartD['user_id'] = $user_id;
+                $this->db->insert('cart',$cartD);
+                $cart_id = $this->db->insert_id();
             }
+            
+            $total = 0;
+            $cart_product_id = 0;
+            foreach($data['services'] as $key=>$val){
+                $laundry_capability_id = $val['laundry_capability_id'];
+                $qty = $val['qty'];
 
-            // $services_str = implode(',',$data['services']);
-            if($cart_data = $this->check_item_available_into_cart($data['user_id'],$data['laundry_id'],$data['services'])){
-                $cart_id = $cart_data->cart_id;
+                $ltc = $this->db->from('laundry_to_capabilities as ltc')
+                                ->join('capabilities c','c.id=ltc.capability_id','left')
+                                ->join('laundries l','l.id=ltc.laundry_id','left')
+                                ->select('l.id as laundry_id,l.name as laundry_name,c.id as capability_id,c.name as capability_name,ltc.standard_amt,ltc.urgent_amt')
+                                ->where('ltc.id',$laundry_capability_id)->get()->row();
+                
+                if($ltc){
+                    if($order_type == 'standard'){
+                        $single_amount = $ltc->standard_amt;
+                    }else{
+                        $single_amount = $ltc->urgent_amt;
+                    }
 
-               
-                $new_qty = (int)$cart_data->qty + (int)$data['qty'];
+                    $total += $total_amount = $single_amount*$qty;
 
-                // $old_cart = $this->db->where('user_id', $data['user_id'])->get('cart')->row();
-                // $cart_data_cart = array();
-                // $cart_data_cart['subtotal'] = $new_qty * $price;
-                // $cart_data_cart['total'] = $old_cart->total+($data['qty'] * $price);
-                // $this->db->where('user_id',$data['user_id']);
-                // $this->db->update('cart',$cart_data_cart);
-
-                $cart_data = array();
-                $cart_data['qty'] = $new_qty;
-                // $cart_data['ss_ids'] = $services_str;
-                $cart_data['price'] = $price;
-                $cart_data['price_total'] = $new_qty * $price;
-                $cart_data['updated_at'] = date('Y-m-d H:i:s');
-
-                $this->db->where('id',$cart_id);
-                if($this->db->update('cart_product',$cart_data)){
-                    $success = "Y";
+                    $cart_pro = array();
+                    $cart_pro['cart_id'] = $cart_id;
+                    $cart_pro['laundry_id'] = $ltc->laundry_id;
+                    $cart_pro['laundry_name'] = $ltc->laundry_name;
+                    $cart_pro['laundry_capability_id'] = $data['ironing_type_id'];
+                    $cart_pro['capability_id'] = $ltc->capability_id;
+                    $cart_pro['capability_name'] = $ltc->capability_name;
+                    $cart_pro['qty'] = $qty;
+                    $cart_pro['single_amount'] = $single_amount;
+                    $cart_pro['total_amount'] = $total_amount;
+                    $cart_pro['order_type'] = $order_type;
+                    $this->db->insert('cart_product',$cart_pro);
+                    $cart_product_id = $this->db->insert_id();
                 }
-            }else{
-                    
-                    if (!$cart_insert_id = check_cart_uesr($data['user_id'])) {
-                        $cart_data_cart = array();
-                        $cart_data_cart['user_id'] = $data['user_id'];
-                        $cart_data_cart['delivery_fees'] = 0;
-                        $cart_data_cart['discount'] = 0;
-                        $cart_data_cart['subtotal'] = 0;
-                        $cart_data_cart['total'] = 0;
-                        $this->db->insert('cart',$cart_data_cart);
-                        $cart_insert_id = $this->db->insert_id();
-                    }
-
-                    $cart_data = array();
-                    $cart_data['user_id'] = $data['user_id'];
-                    $cart_data['cart_id'] = $cart_insert_id;
-                    $cart_data['order_type'] = $data['order_type'];
-                    $cart_data['laundry_id'] = $data['laundry_id'];
-                    $cart_data['qty'] = $data['qty'];
-                    $cart_data['ss_ids'] = $data['services'];
-                    $cart_data['price'] = $price;
-                    $cart_data['price_total'] = $data['qty'] * $price;
-
-                    if($this->db->insert('cart_product',$cart_data)){
-                        $success = "Y";
-                    }
             }
 
-            set_cart_totel($data['user_id']);
+            if($cart_product_id > 0){
+                if(isset($data['ironing_type_id'])){
+                    $it = $this->db->where('id',$data['ironing_type_id'])->get('ironing_type')->row();
+
+                    $cartD = array();
+                    $cartD['cart_id'] = $cart_id;
+                    $cartD['cart_product_id'] = $cart_product_id;
+                    $cartD['ironing_type_id'] = $data['ironing_type_id'];
+                    $cartD['name'] = $it->name;
+                    $this->db->insert('cart_ironing_type',$cartD);
+                }
+
+                if(isset($data['starch_level_id'])){
+                    $sl = $this->db->where('id',$data['starch_level_id'])->get('starch_level')->row();
+
+                    $starchD = array();
+                    $starchD['cart_id'] = $cart_id;
+                    $starchD['cart_product_id'] = $cart_product_id;
+                    $starchD['starch_level_id'] = $data['starch_level_id'];
+                    $starchD['name'] = $sl->name;
+                    $this->db->insert('cart_starch_level',$starchD);
+                }
+                $success = "Y";
+            }
+
+            $this->system->update_cart_total($data['user_id'],$cart_id);
             if($success == "Y"){
                 return true;
             }else{
@@ -363,13 +417,11 @@
 
             $result = array();
             if($query->num_rows() > 0){
-
                 $result = $query->result();
                 foreach($result as $key=>$val){
                     $services = explode(',',$val->capabilities);
                     $result[$key]->capabilities = $services;
                 }
-
             }
             return $result;
         }
@@ -933,7 +985,7 @@
             }
         }
 
-        public function get_laundry($id)
+        public function get_laundry($id,$order_type)
         {
             $result = $this->db->where('id',$id)->select('id,name,arabic_name,image')->get('laundries')->row();
             if($result->image){
@@ -942,9 +994,16 @@
                 $result->image = "";
             }
 
+            $select = "";
+            if($order_type == "standard"){
+                $select = ",standard_amt as amount";
+            }else if($order_type == "urgent"){
+                $select = ",urgent_amt as amount";
+            }
+
             $query = $this->db->from('laundry_to_capabilities ltc')
                         ->join('capabilities c', 'ltc.capability_id = c.id','left')
-                        ->select('ltc.id as laundry_capability_id,standard_amt,urgent_amt,c.name,c.arabic_name')
+                        ->select('ltc.id as laundry_capability_id,c.name,c.arabic_name'.$select)
                         ->where('ltc.laundry_id',$id)
                         ->get();
             $result->items = $query->result();

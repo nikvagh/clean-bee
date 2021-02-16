@@ -559,47 +559,8 @@ class User extends REST_Controller
 
         }
     }
-    public function primary_card_post()
-    {
-         $config = [
-                [
-                        'field' => 'user_id',
-                        'rules' => 'required',
-                        'errors' => [],
-                ],
-                [
-                        'field' => 'card_id',
-                        'rules' => 'required',
-                        'errors' => [],
-                ],
-            ];
 
-            $data = $this->input->post();
-            $this->form_validation->set_data($data);
-            $this->form_validation->set_rules($config);
-            if ($this->form_validation->run() == FALSE)
-            {
-                $result['status'] = 400;
-                foreach($this->form_validation->error_array() as $key => $val){
-                    $result['title'] = $val;
-                    break;
-                }
-                $result['res'] = (object) array();
-                $this->response($result, REST_Controller::HTTP_OK);
 
-            }else{
-
-                if($this->user->primary_card($_POST['user_id'],$_POST['card_id'])){
-
-                    $result['status'] = 200;
-                    $result['title'] = "Card Update Successfully";
-                    $result['res'] =$data;
-                    $this->response($result, REST_Controller::HTTP_OK);
-
-                }
-
-            }
-    }
     public function office_required()
     {
         if($this->input->post('address_type') == 'office' && empty($this->input->post('office_number'))){
@@ -609,7 +570,8 @@ class User extends REST_Controller
         }
        return true;
     }
-     public function apartment_required()
+
+    public function apartment_required()
     {
          if($this->input->post('address_type') == 'apartment' && empty($this->input->post('apartment_number')) ){
             
@@ -816,51 +778,53 @@ class User extends REST_Controller
 
             }
     }
+
     public function address_list_get($user_id)
+    {
+        $address = $this->user->get_address_by_uesr_id($user_id);
+        $result['status'] = 200;
+        $result['title'] = "User Address List";
+        $result['res'] = $address;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
+    public function primary_address_post()
+    {
+        $config = [
+            [
+                    'field' => 'user_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            [
+                    'field' => 'address_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+        if ($this->form_validation->run() == FALSE)
         {
-            $address = $this->user->get_address_by_uesr_id($user_id);
-            $result['status'] = 200;
-            $result['title'] = "User Address List";
-            $result['res'] = $address;
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
-        }
 
-     public function primary_address_post()
-        {
-             $config = [
-                    [
-                            'field' => 'user_id',
-                            'rules' => 'required',
-                            'errors' => [],
-                    ],
-                    [
-                            'field' => 'address_id',
-                            'rules' => 'required',
-                            'errors' => [],
-                    ],
-                ];
-                $data = $this->input->post();
-                $this->form_validation->set_data($data);
-                $this->form_validation->set_rules($config);
-                if ($this->form_validation->run() == FALSE)
-                {
-                    $result['status'] = 400;
-                    foreach($this->form_validation->error_array() as $key => $val){
-                        $result['title'] = $val;
-                        break;
-                    }
-                    $result['res'] = (object) array();
-                    $this->response($result, REST_Controller::HTTP_OK);
-
-                }else{
-                    if($this->user->primary_address($_POST['user_id'],$_POST['address_id'])){
-                        $result['status'] = 200;
-                        $result['title'] = "Address Update Successfully";
-                        $result['res'] =$data;
-                        $this->response($result, REST_Controller::HTTP_OK);
-                    }
-                }
+        }else{
+            if($this->user->primary_address($_POST['user_id'],$_POST['address_id'])){
+                $result['status'] = 200;
+                $result['title'] = "Address Update Successfully";
+                $result['res'] =$data;
+                $this->response($result, REST_Controller::HTTP_OK);
+            }
         }
+    }
+
     public function delete_address_post()
     {
         $config = [
@@ -891,14 +855,16 @@ class User extends REST_Controller
             }
         }
     }
+
     public function user_address_get($address_id)
-        {
-            $address = $this->user->get_address($address_id);
-            $result['status'] = 200;
-            $result['title'] = "User Address";
-            $result['res'] = $address;
-            $this->response($result, REST_Controller::HTTP_OK);
-        }
+    {
+        $address = $this->user->get_address($address_id);
+        $result['status'] = 200;
+        $result['title'] = "User Address";
+        $result['res'] = $address;
+        $this->response($result, REST_Controller::HTTP_OK);
+    }
+
     public function user_profile_get(){
         $this->token_check();
         $user_id = $_GET['user_id'];
@@ -913,47 +879,14 @@ class User extends REST_Controller
         $result['res'] = array_merge($customer,$card);
         $this->response($result, REST_Controller::HTTP_OK);
     }
-    public function delete_card_post()
-    {
-        $config = [
-            [
-                    'field' => 'card_id',
-                    'rules' => 'required',
-                    'errors' => [],
-            ],
-            
-        ];
 
-        $data = $this->input->post();
-        $this->form_validation->set_data($data);
-        $this->form_validation->set_rules($config);
-
-        if ($this->form_validation->run() == FALSE)
-        {
-            $result['status'] = 400;
-            foreach($this->form_validation->error_array() as $key => $val){
-                $result['title'] = $val;
-                break;
-            }
-            $result['res'] = (object) array();
-            $this->response($result, REST_Controller::HTTP_OK);
-
-        }else{
-                           
-            if($this->user->delete_card($_POST['card_id'])){
-
-                $result['status'] = 200;
-                $result['title'] = "Card Delete Successfully";
-                // $result['res'] =$data;
-                $this->response($result, REST_Controller::HTTP_OK);
-
-            }
-
-        }
+    public function cards_list_get($user_id){
+        $this->token_check();
+        $cards = $this->user->get_cards_list($user_id);
+        $this->response(['status' => 200, 'title' => 'Cards list','res'=>$cards], REST_Controller::HTTP_OK);
     }
 
     public function add_card_post(){
-
         $config = [
             [
                     'field' => 'user_id',
@@ -1020,6 +953,89 @@ class User extends REST_Controller
             }
         }
     }
+
+    public function primary_card_post()
+    {
+         $config = [
+                [
+                        'field' => 'user_id',
+                        'rules' => 'required',
+                        'errors' => [],
+                ],
+                [
+                        'field' => 'card_id',
+                        'rules' => 'required',
+                        'errors' => [],
+                ],
+            ];
+
+            $data = $this->input->post();
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules($config);
+            if ($this->form_validation->run() == FALSE)
+            {
+                $result['status'] = 400;
+                foreach($this->form_validation->error_array() as $key => $val){
+                    $result['title'] = $val;
+                    break;
+                }
+                $result['res'] = (object) array();
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }else{
+
+                if($this->user->primary_card($_POST['user_id'],$_POST['card_id'])){
+
+                    $result['status'] = 200;
+                    $result['title'] = "Card Update Successfully";
+                    $result['res'] =$data;
+                    $this->response($result, REST_Controller::HTTP_OK);
+
+                }
+
+            }
+    }
+
+    public function delete_card_post()
+    {
+        $config = [
+            [
+                    'field' => 'card_id',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+            
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+                           
+            if($this->user->delete_card($_POST['card_id'])){
+
+                $result['status'] = 200;
+                $result['title'] = "Card Delete Successfully";
+                // $result['res'] =$data;
+                $this->response($result, REST_Controller::HTTP_OK);
+
+            }
+
+        }
+    }
+
+    
 
     public function chk_valid_month_year()
     {
