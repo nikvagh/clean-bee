@@ -161,14 +161,16 @@ class Product extends REST_Controller
             }
 
             $filter = "";
-            if(isset($_POST['filter']) && $_POST['filter']){
-                $filter = $_POST['filter'];
+            if(isset($_POST['filter'])){
+                $filter = explode(',',$_POST['filter']);
                 // if($_POST['filter'] != "all" && $_POST['filter'] != "favourite" && $_POST['filter'] != "nearby"){
                 //     $result['status'] = 400;
                 //     $result['title'] = "Filter values must be all,favourite or nearby";
                 //     $result['res'] = [];
                 //     $this->response($result, REST_Controller::HTTP_OK);
                 // }
+
+                $filter = array_filter($filter);
             }
 
             $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search,$filter);

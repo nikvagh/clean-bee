@@ -62,8 +62,23 @@ class Product_model extends CI_Model{
 
                 foreach($result as $key=>$val){
 
+                    $this->db->select('AVG(rate) as rate');
+                    $this->db->from('shop_ratings sr');
+                    $this->db->where('sr.shop_id',$val->id);
+                    $query3 = $this->db->get();
+                    // echo $this->db->last_query();
+
+                    $result3 = 0;
+                    if($query3->row('rate') != null){
+                        $result3 = $query3->row('rate');
+                    }
+
+                    $result[$key]->rating  = $rating =  number_format($result3,2,".","");
                     if($filter == 1){
                         // rating
+                        if($rating < 3){
+                            continue;
+                        }
                     }
 
                     $favourite = false;
@@ -118,20 +133,6 @@ class Product_model extends CI_Model{
                     //     }
                     // }
                     // $result[$key]->capabilities = $result2;
-
-                    // =====================
-                    $this->db->select('AVG(rate) as rate');
-                    $this->db->from('shop_ratings sr');
-                    $this->db->where('sr.shop_id',$val->id);
-                    $query3 = $this->db->get();
-                    // echo $this->db->last_query();
-
-                    $result3 = 0;
-                    if($query3->row('rate') != null){
-                        $result3 = $query3->row('rate');
-                    }
-
-                    $result[$key]->rating =  number_format($result3,2,".","");
 
                     $res[] = $result[$key];
                 }

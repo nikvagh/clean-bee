@@ -149,17 +149,19 @@ class User extends REST_Controller
             //     $this->response($result, REST_Controller::HTTP_OK);
             // }
 
-            // sent otp
-            $otp = "1234";
-            // $otp = otp_generate(4);
-            // sent_otp();
+            // // sent otp
+            // $otp = "1234";
+            // // $otp = otp_generate(4);
+            // // sent_otp();
             
-            if($this->user->update_otp($_POST['phone'],$otp)){
-                $result['status'] = 200;
-                $result['title'] = 'otp sent successfully';
-                $result['res'] = (object) array();
-                $this->response($result, REST_Controller::HTTP_OK);
-            }
+            // if($this->user->update_otp($_POST['phone'],$otp)){
+            //     $result['status'] = 200;
+            //     $result['title'] = 'otp sent successfully';
+            //     $result['res'] = (object) array();
+            //     $this->response($result, REST_Controller::HTTP_OK);
+            // }
+
+            $this->response(['status'=>200,'title'=>'you can proceed further'], REST_Controller::HTTP_OK);
 
         }
 
@@ -170,37 +172,31 @@ class User extends REST_Controller
         $config = [
             [
                     'field' => 'firstname',
-                    'label' => 'firstname',
                     'rules' => 'required',
                     'errors' => [],
             ],
             [
                     'field' => 'lastname',
-                    'label' => 'Lastname',
                     'rules' => 'required',
                     'errors' => [],
             ],
             [
                     'field' => 'username',
-                    'label' => 'Username',
                     'rules' => 'required|callback_usernamecheck',
                     'errors' => [],
             ],
             [
                     'field' => 'email',
-                    'label' => 'Email',
                     'rules' => 'required|callback_emailcheck|callback_chk_valid_email',
                     'errors' => [],
             ],
             [
                     'field' => 'password',
-                    'label' => 'Password',
                     'rules' => 'required|min_length[6]',
                     'errors' => [],
             ],
             [
                     'field' => 'confirm_password',
-                    'label' => 'Confirm Password',
                     'rules' => 'required|matches[password]',
                     'errors' => [],
             ],
@@ -225,12 +221,12 @@ class User extends REST_Controller
                     ],
 
             ],
-            [
-                    'field' => 'otp',
-                    'label' => 'otp',
-                    'rules' => 'required',
-                    'errors' => [],
-            ],
+            // [
+            //         'field' => 'otp',
+            //         'label' => 'otp',
+            //         'rules' => 'required',
+            //         'errors' => [],
+            // ],
             [
                     'field' => 'device_token',
                     'label' => 'device_token',
@@ -262,7 +258,7 @@ class User extends REST_Controller
 
         }else{
 
-            if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
+            // if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
 
                 $signup_user = array(
                     'email' => $_POST['email'],
@@ -300,15 +296,14 @@ class User extends REST_Controller
                         $result['res'] = $customer;
                         $this->response($result, REST_Controller::HTTP_OK);
                     }
-
                 }
 
-            }else{
-                $result['status'] = 310;
-                $result['title'] = "Wrong OTP";
-                $result['res'] = (object) array();
-                $this->response($result, REST_Controller::HTTP_OK);
-            }
+            // }else{
+            //     $result['status'] = 310;
+            //     $result['title'] = "Wrong OTP";
+            //     $result['res'] = (object) array();
+            //     $this->response($result, REST_Controller::HTTP_OK);
+            // }
 
         }
 
@@ -319,19 +314,16 @@ class User extends REST_Controller
         $config = [
             [
                     'field' => 'username',
-                    'label' => 'username',
                     'rules' => 'required',
                     'errors' => [],
             ],
             [
                     'field' => 'password',
-                    'label' => 'password',
                     'rules' => 'required',
                     'errors' => [],
             ],
             [
                     'field' => 'device_token',
-                    'label' => 'device_token',
                     'rules' => 'required',
                     'errors' => [],
             ],
@@ -348,7 +340,6 @@ class User extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
@@ -419,6 +410,79 @@ class User extends REST_Controller
             
         }
 
+    }
+
+    public function sign_in_guest_post(){
+        $config = [
+            [
+                    'field' => 'device_token',
+                    'rules' => 'required',
+                    'errors' => [],
+            ],
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $this->response($result, REST_Controller::HTTP_OK);
+
+        }else{
+            $guest = $this->db->from('users u')
+                    ->join('customers c','c.customer_id = u.id','left')
+                    ->where('u.device_token',$_POST['device_token'])->where('c.is_guest','Y')->get()->row();
+            if(!$guest){
+
+                $signup_user = array(
+                    'email' => '',
+                    'password' => '',
+                    'phone' => '',
+                    'role_id' => 3,
+                    'token' => '',
+                    'device_token' => $_POST['device_token']
+                );
+
+                if($this->db->insert('users',$signup_user)){
+                    $user_id = $this->db->insert_id();
+
+                    $signup_customer = array(
+                        'customer_id' => $user_id,
+                        'firstname' => 'guest',
+                        'lastname' => '',
+                        'username' => '',
+                        'img' => '',
+                        'phone_varified' => 'false',
+                        'is_guest' => 'Y'
+                    );
+                    if($this->db->insert('customers',$signup_customer)){
+                        $this->user->update_user_token($user_id);
+                        $this->user->update_device_token($user_id,$_POST['device_token']);
+                        $customer = $this->user->get_customer_by_id($user_id);
+
+                        $result['status'] = 200;
+                        $result['title'] = "Guest logged in success";
+                        $result['res'] = $customer;
+                        $this->response($result, REST_Controller::HTTP_OK);
+                    }
+                }
+
+            }else{
+
+                $this->user->update_user_token($guest->customer_id);
+                $this->user->update_device_token($guest->customer_id,$_POST['device_token']);
+                $customer = $this->user->get_customer_by_id($guest->customer_id);
+
+                $this->response(['status' => 200,'title' => "Guest logged in success", 'res' => $customer], REST_Controller::HTTP_OK);
+            }
+
+        }
     }
 
     public function login_with_other_post(){
@@ -573,7 +637,7 @@ class User extends REST_Controller
 
     public function apartment_required()
     {
-         if($this->input->post('address_type') == 'apartment' && empty($this->input->post('apartment_number')) ){
+        if($this->input->post('address_type') == 'apartment' && empty($this->input->post('apartment_number')) ){
             
                 $this->form_validation->set_message('apartment_required', 'apartment number is required');
                 return false;
