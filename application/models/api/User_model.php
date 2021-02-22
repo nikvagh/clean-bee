@@ -58,7 +58,7 @@
         }
 
         public function get_customer_by_id($user_id){
-            $this->db->select('u.id,u.phone,u.email,u.password,u.role_id,u.privileges,u.token,u.device_token,c.firstname,c.lastname,c.username,c.img,c.phone_varified,c.email_varified,c.wallet,c.login_provider,c.provider_token');
+            $this->db->select('u.id,u.phone,u.email,u.password,u.role_id,u.privileges,u.token,u.device_token,c.firstname,c.lastname,c.username,c.img,c.phone_varified,c.email_varified,c.wallet,c.login_provider,c.provider_token,c.is_guest');
             $this->db->from('users u');
             $this->db->join('customers c','c.customer_id = u.id','left');
             $this->db->where('u.id',$user_id);

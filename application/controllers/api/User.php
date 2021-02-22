@@ -1247,7 +1247,6 @@ class User extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
@@ -1260,7 +1259,6 @@ class User extends REST_Controller
             if($this->user->update_otp($_POST['phone'],$otp)){
                 $result['status'] = 200;
                 $result['title'] = "OTP sent on your new phone number";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
@@ -1302,7 +1300,6 @@ class User extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
@@ -1312,14 +1309,12 @@ class User extends REST_Controller
                 if($this->user->update_phone($_POST['user_id'],$_POST['phone'])){
                     $result['status'] = 200;
                     $result['title'] = "Phone number updated successfully";
-                    $result['res'] = (object) array();
                     $this->response($result, REST_Controller::HTTP_OK);
                 }
 
             }else{
                 $result['status'] = 310;
                 $result['title'] = "Wrong OTP";
-                $result['res'] = (object) array();
                 $this->response($result, REST_Controller::HTTP_OK);
             }
 
@@ -1830,6 +1825,7 @@ class User extends REST_Controller
             }
         }  
     }
+
     public function forgot_password_match_post()
     {
          $config = [
@@ -1881,8 +1877,9 @@ class User extends REST_Controller
                     $this->response($result, REST_Controller::HTTP_OK);
             }
             
-        }  
+        }
     }
+
     public function forgot_password_change_post()
     {
          $config = [
@@ -1929,6 +1926,6 @@ class User extends REST_Controller
                
             }
             
-        }  
+        }
     }
 }

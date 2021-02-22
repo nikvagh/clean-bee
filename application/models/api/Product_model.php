@@ -141,7 +141,7 @@ class Product_model extends CI_Model{
             return $res;
         }
 
-        public function get_laundries($shop_id,$per_page="",$page_no="",$search,$filter){
+        public function get_laundries($shop_id,$per_page="",$page_no="",$search,$filter,$user_id){
             // $offset = (int)$per_page * (int)$page_no;
             // $query = $this->db->select('id,name')->get('laundry_type');
 
@@ -174,6 +174,16 @@ class Product_model extends CI_Model{
                         $img = "";
                     }
                     $laundries[$key1]->img = $img;
+
+                    $cart_count = $this->db->from('cart_product cp')->select('COALESCE(COUNT(cp.id),0) as total')
+                                    ->join('cart c', 'c.id = cp.cart_id')
+                                    ->where('cp.laundry_id',$val1->id)->where('cp.laundry_type_id',$val->id)
+                                    ->where('c.customer_id',$user_id)
+                                    // ->group_by('cp.id')
+                                    ->get()->row();
+
+                    $laundries[$key1]->cart_count = $cart_count->total;
+
                 }
 
                 $list[$key]->items = $laundries;
@@ -293,8 +303,10 @@ class Product_model extends CI_Model{
 
                 $ltc = $this->db->from('laundry_to_capabilities as ltc')
                                 ->join('capabilities c','c.id=ltc.capability_id','left')
-                                ->join('laundries l','l.id=ltc.laundry_id','left')
-                                ->select('l.id as laundry_id,l.name as laundry_name,c.id as capability_id,c.name as capability_name,ltc.standard_amt,ltc.urgent_amt')
+                                ->join('laundry_type_assign lta','lta.id = ltc.laundry_type_assign_id','left')
+                                ->join('laundry_type lt','lt.id = lta.laundry_type_id','left')
+                                ->join('laundries l','l.id = lta.laundry_id','left')
+                                ->select('l.id as laundry_id,l.name as laundry_name,lt.id as laundry_type_id,lt.name as laundry_type_name,c.id as capability_id,c.name as capability_name,ltc.standard_amt,ltc.urgent_amt')
                                 ->where('ltc.id',$laundry_capability_id)->get()->row();
                 
                 if($ltc){
@@ -310,6 +322,8 @@ class Product_model extends CI_Model{
                     $cart_pro['cart_id'] = $cart_id;
                     $cart_pro['laundry_id'] = $ltc->laundry_id;
                     $cart_pro['laundry_name'] = $ltc->laundry_name;
+                    $cart_pro['laundry_type_id'] = $ltc->laundry_type_id;
+                    $cart_pro['laundry_type_name'] = $ltc->laundry_type_name;
                     $cart_pro['laundry_capability_id'] = $data['ironing_type_id'];
                     $cart_pro['capability_id'] = $ltc->capability_id;
                     $cart_pro['capability_name'] = $ltc->capability_name;
@@ -408,8 +422,21 @@ class Product_model extends CI_Model{
             }
         }
 
-        public function get_cart($user_id){
-            $this->db->select('c.id,l.id as laundry_id,l.name as laundry,c.qty,c.ss_ids as capabilities,c.price,c.price_total');
+        public function get_cart_data($user_id){
+
+            $cart = $this->db->where('user_id',$user_id)->get('cart')->row();
+            
+            $order_details = [];
+            if($cart){
+                $cart_capabilities = $this->db->from('cart_product cp')->select('cp.capability_name')->where('cart_id',$cart->id)->get()->result();
+                foreach($cart_capabilities as $key=>$val){
+                    $cart_laundries = $this->db->from('cart_product cp')->where('cart_id',$cart->id)->where('capability_name',$cart_capabilities->capability_name)->get()->result();
+                }
+
+            }
+
+
+            $this->db->select('c.id,l.id as laundry_id,l.name as laundry,c.qty,c.price,c.price_total');
             // $this->db->where_in('ss.id',$services);
             $this->db->from('cart_product c');
             $this->db->join('laundries l','l.id = c.laundry_id','left');
@@ -1004,8 +1031,9 @@ class Product_model extends CI_Model{
 
             $query = $this->db->from('laundry_to_capabilities ltc')
                         ->join('capabilities c', 'ltc.capability_id = c.id','left')
+                        ->join('laundry_type_assign lta', 'lta.id = ltc.laundry_type_assign_id','left')
                         ->select('ltc.id as laundry_capability_id,c.name,c.arabic_name'.$select)
-                        ->where('ltc.laundry_id',$id)
+                        ->where('lta.laundry_id',$id)
                         ->get();
             $result->items = $query->result();
             // foreach ($result->items as $key => $value) {

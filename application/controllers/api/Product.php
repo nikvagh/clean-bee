@@ -131,7 +131,6 @@ class Product extends REST_Controller
             [
                     'field' => 'shop_id',
                     'rules' => 'required',
-                    'errors' => [],
             ],
             // [
             //         'field' => 'page_number',
@@ -139,6 +138,10 @@ class Product extends REST_Controller
             //         'rules' => 'required|numeric',
             //         'errors' => [],
             // ]
+            [
+                    'field' => 'user_id',
+                    'rules' => 'required'
+            ],
         ];
 
         $data = $this->input->post();
@@ -173,7 +176,7 @@ class Product extends REST_Controller
                 $filter = array_filter($filter);
             }
 
-            $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search,$filter);
+            $laundries = $this->product->get_laundries($_POST['shop_id'],0,0,$search,$filter,$_POST['user_id']);
             $result['status'] = 200;
             $result['title'] = "Laundries list";
             $result['res'] = $laundries;
@@ -334,7 +337,7 @@ class Product extends REST_Controller
 
             if($this->product->add_to_cart($_POST)){
                 $result['status'] = 200;
-                $result['title'] = "Cart data updated successfully";
+                $result['title'] = "Cart data saved successfully";
                 $this->response($result, REST_Controller::HTTP_OK);
             }else{
                 $result['status'] = 330;
@@ -529,15 +532,39 @@ class Product extends REST_Controller
         }
     }
 
-    public function get_cart_get(){
+    public function checkout_post(){
         $this->token_check();
-        $user_id = $_GET['user_id'];
-        $cart = $this->product->get_cart($user_id);
-        
-        $result['status'] = 200;
-        $result['title'] = "Cart";
-        $result['res'] = $cart;
-        $this->response($result, REST_Controller::HTTP_OK);
+
+        $config = [
+            [
+                'field' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            $user_id = $_POST['user_id'];
+            $cart = $this->product->get_cart_data($user_id);
+            
+            $result['status'] = 200;
+            $result['title'] = "Cart";
+            $result['res'] = $cart;
+            $this->response($result, REST_Controller::HTTP_OK);
+        }
     }
 
     public function switch_order_type_post(){
