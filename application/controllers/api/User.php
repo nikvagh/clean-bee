@@ -1281,12 +1281,12 @@ class User extends REST_Controller
                     'rules' => 'required|callback_phonecheck_edit',
                     'errors' => [],
             ],
-            [
-                    'field' => 'otp',
-                    'label' => 'otp',
-                    'rules' => 'required',
-                    'errors' => [],
-            ]
+            // [
+            //         'field' => 'otp',
+            //         'label' => 'otp',
+            //         'rules' => 'required',
+            //         'errors' => [],
+            // ]
         ];
 
         $data = $this->input->post();
@@ -1304,7 +1304,7 @@ class User extends REST_Controller
 
         }else{
 
-            if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
+            // if($this->user->check_otp($_POST['phone'],$_POST['otp'])){
 
                 if($this->user->update_phone($_POST['user_id'],$_POST['phone'])){
                     $result['status'] = 200;
@@ -1312,11 +1312,11 @@ class User extends REST_Controller
                     $this->response($result, REST_Controller::HTTP_OK);
                 }
 
-            }else{
-                $result['status'] = 310;
-                $result['title'] = "Wrong OTP";
-                $this->response($result, REST_Controller::HTTP_OK);
-            }
+            // }else{
+            //     $result['status'] = 310;
+            //     $result['title'] = "Wrong OTP";
+            //     $this->response($result, REST_Controller::HTTP_OK);
+            // }
 
         }
     }

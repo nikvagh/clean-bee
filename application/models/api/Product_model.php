@@ -152,12 +152,20 @@ class Product_model extends CI_Model{
                             if(!empty($filter)){
                                 $list = $this->db->where_in('lt.id',$filter);
                             }
-                            $list = $list->where('l.shop_id',$shop_id)->get()->result();
+                            if($search != ""){
+                                $laundries = $this->db->like('l.name',$search);
+                            }
+                            $list = $list->where('l.shop_id',$shop_id)->group_by('lt.id')->get()->result();
 
             $laundry_types = [];
+            $lt_added = [];
             foreach($list as $key=>$val){
 
-                $laundry_types[] = ["laundry_type_id"=>$val->id,"name"=>$val->name];
+                if(!in_array($val->id,$lt_added)){
+                    $laundry_types[] = ["laundry_type_id"=>$val->id,"name"=>$val->name];
+                    $lt_added[] = $val->id;
+                }
+                
                 $laundries = $this->db->from('laundry_type_assign lta')
                                 ->join('laundries l', 'lta.laundry_id = l.id')
                                 ->select('l.id,l.name,l.arabic_name,l.does_require_car,l.specification,l.image');
@@ -169,16 +177,16 @@ class Product_model extends CI_Model{
 
                 foreach($laundries as $key1=>$val1){
                     if($val1->image != ''){
-                        $img = base_url().LAUNDRY_IMG_PATH.$val1->image;
+                        $image = base_url().LAUNDRY_IMG_PATH.$val1->image;
                     }else{
-                        $img = "";
+                        $image = "";
                     }
-                    $laundries[$key1]->img = $img;
+                    $laundries[$key1]->image = $image;
 
                     $cart_count = $this->db->from('cart_product cp')->select('COALESCE(COUNT(cp.id),0) as total')
                                     ->join('cart c', 'c.id = cp.cart_id')
                                     ->where('cp.laundry_id',$val1->id)->where('cp.laundry_type_id',$val->id)
-                                    ->where('c.customer_id',$user_id)
+                                    ->where('c.user_id',$user_id)
                                     // ->group_by('cp.id')
                                     ->get()->row();
 
