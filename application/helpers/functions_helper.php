@@ -162,10 +162,9 @@ if (!function_exists('set_cart_totel')){
 	function set_cart_totel($id)
 	{
 		$db =& get_instance();
-		$cart_data= $db->db->where('user_id',$id)->get('cart')->row();
-		$cart_pro_totel= $db->db->where('user_id',$id)->select('sum(price_total) as total')->get('cart_product')->row();
-
- 		$total=$cart_pro_totel->total - ($cart_data->discount);
+		$cart= $db->db->where('user_id',$id)->get('cart')->row();
+		$cart_pro_totel= $db->db->where('cart_id',$cart->id)->select('sum(total_amount) as total')->get('cart_product')->row();
+ 		$total=$cart_pro_totel->total - ($cart->discount);
         $cart_data_cart = array();
         $cart_data_cart['subtotal'] = $cart_pro_totel->total;
         $cart_data_cart['total'] = $total;
@@ -175,6 +174,7 @@ if (!function_exists('set_cart_totel')){
 		return true;
 	}
 }
+
 if (!function_exists('check_cart_uesr')) {
 	function check_cart_uesr($id)
 	{

@@ -139,7 +139,6 @@
         }
 
         function exportXLS(){ 
-
             $data = $this->bid->get_bids();
             // include('./PHPExcel/PHPExcel.php');
             $this->load->library('xls');
@@ -148,7 +147,6 @@
             // Create a first sheet, representing sales data
             $objPHPExcel->setActiveSheetIndex(0);
             // Rename sheet
-            
             $rowSheet1 = 1;$colSheet1 = 0;
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($colSheet1,$rowSheet1,'#');
             $colSheet1++;

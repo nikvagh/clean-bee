@@ -1224,4 +1224,42 @@ class Product extends REST_Controller
             return false;
         }
     }
+    public function get_delivery_time_post()
+    {
+        $this->token_check();
+        $config = [
+            [
+                'field' => 'user_id',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'easy_switch',
+                'rules' => 'required',
+                'errors' => [],
+            ],
+            [
+                'field' => 'time',
+                'rules' => 'required',
+                'errors' => [],
+            ]
+        ];
+
+        $data = $this->input->post();
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules($config);
+
+        if ($this->form_validation->run() == FALSE)
+        {
+            $result['status'] = 400;
+            foreach($this->form_validation->error_array() as $key => $val){
+                $result['title'] = $val;
+                break;
+            }
+            $result['res'] = (object) array();
+            $this->response($result, REST_Controller::HTTP_OK);
+        }else{
+            echo "string";
+        }
+    }
 }

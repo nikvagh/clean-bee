@@ -548,7 +548,8 @@ class Product_model extends CI_Model{
             $this->db->where('find_in_set('.$vendor_id.',d.vendor_id) > 0');
             $this->db->from('discounts d');
             $query = $this->db->get();
-
+            // print_r($query);
+            // exit();
             $row = (object) array();
             if ($query->num_rows() > 0) {
                 $row = $query->row();
@@ -556,11 +557,12 @@ class Product_model extends CI_Model{
                 $old_cart = $this->db->where('user_id', $user_id)->get('cart')->row();
                 $cart_data_cart = array();
                 $cart_data_cart['discount'] = $old_cart->discount + $row->value;
-                $cart_data_cart['total'] = $old_cart->total - $row->value;
+                // $cart_data_cart['total'] = $old_cart->total - $row->value;
                 // print_r($old_cart->total);
                 // exit();
                 $this->db->where('user_id',$user_id);
                 $this->db->update('cart',$cart_data_cart);
+                set_cart_totel($user_id);
             }else{
                 $row = false;
             }
@@ -1096,14 +1098,39 @@ class Product_model extends CI_Model{
 
         public function get_checkout($user_id)
         {
-            $collection_dt_list = [];
-            $curr_datetime1 = $this->curr_date_time;
-            for($i=1;$i<=24;$i++){
-                $curr_datetime1 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
-                $curr_datetime2 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
-                $collection_dt_list[] = $curr_datetime1.' - '.$curr_datetime2;
+            $collection_dates = [];
+            // $delivery_dates= [];
+            // $curr_datetime = $this->curr_date_time;
+            $curr_datetime = date('Y-m-d H:00:00',strtotime('+1 Hour',strtotime($this->curr_date_time)));
+            // print_r($curr_datetime);
+            // exit();
+            for($i=1;$i<=7;$i++){
+                $day[$i]= $curr_datetime = date('Y-m-d H:i',strtotime('+1 day',strtotime($curr_datetime)));
             }
+            foreach ($day as  $key => $curr_datetime1) {
+                for($i=1;$i<=24;$i++){
 
+                    $curr_datetime1 = date('Y-m-d H:i:s',strtotime('+1 Hour',strtotime($curr_datetime1)));
+                    $curr_datetime2 = date('Y-m-d H:i:s',strtotime('+1 Hour',strtotime($curr_datetime1)));
+
+                    $from_time = date('h:i A',strtotime($curr_datetime1));
+                    $to_time = date('h:i A',strtotime($curr_datetime2));
+
+                    // $from_date = date('Y-m-d',strtotime($curr_datetime1));
+                    // $todat_date = date('Y-m-d',strtotime($day[$key]));
+                    // if ($todat_date == $from_date) {
+                    $time[] = array('time_text' => $from_time.' - '.$to_time, 'from_time' => $curr_datetime1 , 'to_time' => $curr_datetime2);
+                        
+                    // }
+                        
+                }
+                $collection_dates[] = array(
+                                // 'curr_datetime' => $curr_datetime,
+                                'date_text' => date('d F y',strtotime($day[$key])),
+                                'date' => date('Y-m-d',strtotime($day[$key])),
+                                'time' => $time );
+            }
+             // return $result;
             // $delivery_dt_list = [];
             // $curr_datetime1 = $this->curr_date_time;
             // for($i=1;$i<=24;$i++){
@@ -1112,16 +1139,19 @@ class Product_model extends CI_Model{
             //     $delivery_dt_list[] = $curr_datetime1.' - '.$curr_datetime2;
             // }
 
-            $collection_dates = $collection_dt_list;
-            // $delivery_dates = $delivery_dt_list;
+            // $collection_dates = $collection_dt_list;
+            // // $delivery_dates = $delivery_dt_list;
 
             $cart = $this->get_cart($user_id);
 
             $result['cart'] = $cart;
             $result['collection_date'] = $collection_dates;
-            $result['delivery_dates'] = $delivery_dates;
+            // $result['delivery_dates'] = $delivery_dates;
             return $result;
         }
+        // public function delivery_time($user_id){
+            
+        // }
         
     }
 ?>
