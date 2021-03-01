@@ -594,7 +594,7 @@
         }
         public function forgot_password_update($phone,$password)
         {
-             $success = "N";
+            $success = "N";
 
             $data_user = array(
                 'password'=>$password

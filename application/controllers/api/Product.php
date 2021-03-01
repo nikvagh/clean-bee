@@ -273,10 +273,10 @@ class Product extends REST_Controller
 
     public function add_to_cart_post(){
         $this->token_check();
-        // $_POST = json_decode($this->input->raw_input_stream,true);
+        // $data = json_decode($this->input->raw_input_stream,true);
+        // $_POST = json_decode($data,true);
+
         $_POST = $this->request->body;
-        // print_r($_POST);
-        // exit;
 
         $config = [
             [
@@ -528,41 +528,6 @@ class Product extends REST_Controller
                 $result['status'] = 200;
                 $result['title'] = "Shop removed from your favourite list";
             }
-            $this->response($result, REST_Controller::HTTP_OK);
-        }
-    }
-
-    public function checkout_post(){
-        $this->token_check();
-
-        $config = [
-            [
-                'field' => 'user_id',
-                'rules' => 'required',
-                'errors' => [],
-            ]
-        ];
-
-        $data = $this->input->post();
-        $this->form_validation->set_data($data);
-        $this->form_validation->set_rules($config);
-
-        if ($this->form_validation->run() == FALSE)
-        {
-            $result['status'] = 400;
-            foreach($this->form_validation->error_array() as $key => $val){
-                $result['title'] = $val;
-                break;
-            }
-            $result['res'] = (object) array();
-            $this->response($result, REST_Controller::HTTP_OK);
-        }else{
-            $user_id = $_POST['user_id'];
-            $cart = $this->product->get_cart_data($user_id);
-            
-            $result['status'] = 200;
-            $result['title'] = "Cart";
-            $result['res'] = $cart;
             $this->response($result, REST_Controller::HTTP_OK);
         }
     }
@@ -1180,7 +1145,42 @@ class Product extends REST_Controller
         }
     }
 
-    public function get_checkout_post()
+    // public function checkout_post(){
+    //     $this->token_check();
+
+    //     $config = [
+    //         [
+    //             'field' => 'user_id',
+    //             'rules' => 'required',
+    //             'errors' => [],
+    //         ]
+    //     ];
+
+    //     $data = $this->input->post();
+    //     $this->form_validation->set_data($data);
+    //     $this->form_validation->set_rules($config);
+
+    //     if ($this->form_validation->run() == FALSE)
+    //     {
+    //         $result['status'] = 400;
+    //         foreach($this->form_validation->error_array() as $key => $val){
+    //             $result['title'] = $val;
+    //             break;
+    //         }
+    //         $result['res'] = (object) array();
+    //         $this->response($result, REST_Controller::HTTP_OK);
+    //     }else{
+    //         $user_id = $_POST['user_id'];
+    //         $cart = $this->product->get_cart_data($user_id);
+            
+    //         $result['status'] = 200;
+    //         $result['title'] = "Cart";
+    //         $result['res'] = $cart;
+    //         $this->response($result, REST_Controller::HTTP_OK);
+    //     }
+    // }
+
+    public function checkout_detail_post()
     {
         $this->token_check();
         $config = [

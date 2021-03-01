@@ -1914,16 +1914,13 @@ class User extends REST_Controller
                 $result['title'] = $val;
                 break;
             }
-            $result['res'] = (object) array();
             $this->response($result, REST_Controller::HTTP_OK);
 
         }else{
             if ($this->user->forgot_password_update($_POST['phone'],$_POST['password'])) {
-                    $result['status'] = 200;
-                    $result['title'] = 'Password Update successfully';
-                    // $result['res'] = (object) array();
-                    $this->response($result, REST_Controller::HTTP_OK);
-               
+                $result['status'] = 200;
+                $result['title'] = 'Password Update successfully';
+                $this->response($result, REST_Controller::HTTP_OK);
             }
             
         }

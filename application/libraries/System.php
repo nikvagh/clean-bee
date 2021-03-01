@@ -28,15 +28,20 @@
 			$subtotal = 0;
 			$is_cart = "";
 			if($user_id != ""){
-				$is_cart = "Y";
 				$cart = $this->obj->db->where('user_id',$user_id)->get('cart')->row();
+				if($cart){
+					$is_cart = "Y";
+				}
 			}else if($cart_id != ""){
-				$is_cart = "Y";
 				$cart = $this->obj->db->where('id',$cart_id)->get('cart')->row();
+				if($cart){
+					$is_cart = "Y";
+				}
 			}
 
 			if($is_cart == 'Y'){
 				$cart_id = $cart->id;
+				$user_id = $cart->user_id;
 				$cart_products = $this->obj->db->where('cart_id',$cart_id)->get('cart_product')->result();
 				foreach($cart_products as $key=>$val){
 					$subtotal += $val->total_amount;
@@ -54,6 +59,12 @@
             $cartD['total'] = $total;
             $this->obj->db->where('id',$cart_id);
             $this->obj->db->update('cart',$cartD);
+
+			$cart = $this->obj->db->from('cart')->where('user_id',$user_id)->get()->row();
+			if(!$cart){
+				$cart = (object) [];
+			}
+			return $cart;
 		}
 
 	}

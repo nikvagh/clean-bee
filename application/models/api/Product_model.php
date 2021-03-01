@@ -6,7 +6,7 @@ class Product_model extends CI_Model{
         function __construct(){
             parent::__construct();
             // $this->table='users';
-            $this->curr_date = date('Y-m-d H:i:s');
+            $this->curr_date_time = $this->curr_date = date('Y-m-d H:i:s');
             $this->today_date = date('Y-m-d');
         }
 
@@ -173,7 +173,7 @@ class Product_model extends CI_Model{
                                     $laundries = $this->db->like('l.name',$search);
                                 }
                                 
-                                $laundries = $this->db->where('l.shop_id',$shop_id)->group_by('l.id')->get()->result();
+                                $laundries = $this->db->where('l.shop_id',$shop_id)->where('lta.laundry_type_id',$val->id)->group_by('l.id')->get()->result();
 
                 foreach($laundries as $key1=>$val1){
                     if($val1->image != ''){
@@ -185,7 +185,8 @@ class Product_model extends CI_Model{
 
                     $cart_count = $this->db->from('cart_product cp')->select('COALESCE(COUNT(cp.id),0) as total')
                                     ->join('cart c', 'c.id = cp.cart_id')
-                                    ->where('cp.laundry_id',$val1->id)->where('cp.laundry_type_id',$val->id)
+                                    ->where('cp.laundry_id',$val1->id)
+                                    ->where('cp.laundry_type_id',$val->id)
                                     ->where('c.user_id',$user_id)
                                     // ->group_by('cp.id')
                                     ->get()->row();
@@ -198,8 +199,11 @@ class Product_model extends CI_Model{
 
             }
 
+            $cart = $this->system->update_cart_total($user_id);
+
             $res['laundry_types'] = $laundry_types;
             $res['list'] = $list;
+            $res['cart'] = $cart;
             return $res;
         }
 
@@ -332,7 +336,7 @@ class Product_model extends CI_Model{
                     $cart_pro['laundry_name'] = $ltc->laundry_name;
                     $cart_pro['laundry_type_id'] = $ltc->laundry_type_id;
                     $cart_pro['laundry_type_name'] = $ltc->laundry_type_name;
-                    $cart_pro['laundry_capability_id'] = $data['ironing_type_id'];
+                    $cart_pro['laundry_capability_id'] = $laundry_capability_id;
                     $cart_pro['capability_id'] = $ltc->capability_id;
                     $cart_pro['capability_name'] = $ltc->capability_name;
                     $cart_pro['qty'] = $qty;
@@ -345,7 +349,7 @@ class Product_model extends CI_Model{
             }
 
             if($cart_product_id > 0){
-                if(isset($data['ironing_type_id'])){
+                if(isset($data['ironing_type_id']) && $data['ironing_type_id'] != null){
                     $it = $this->db->where('id',$data['ironing_type_id'])->get('ironing_type')->row();
 
                     $cartD = array();
@@ -356,7 +360,7 @@ class Product_model extends CI_Model{
                     $this->db->insert('cart_ironing_type',$cartD);
                 }
 
-                if(isset($data['starch_level_id'])){
+                if(isset($data['starch_level_id']) && $data['starch_level_id'] != null){
                     $sl = $this->db->where('id',$data['starch_level_id'])->get('starch_level')->row();
 
                     $starchD = array();
@@ -431,7 +435,6 @@ class Product_model extends CI_Model{
         }
 
         public function get_cart_data($user_id){
-
             $cart = $this->db->where('user_id',$user_id)->get('cart')->row();
             
             $order_details = [];
@@ -440,9 +443,7 @@ class Product_model extends CI_Model{
                 foreach($cart_capabilities as $key=>$val){
                     $cart_laundries = $this->db->from('cart_product cp')->where('cart_id',$cart->id)->where('capability_name',$cart_capabilities->capability_name)->get()->result();
                 }
-
             }
-
 
             $this->db->select('c.id,l.id as laundry_id,l.name as laundry,c.qty,c.price,c.price_total');
             // $this->db->where_in('ss.id',$services);
@@ -1064,35 +1065,63 @@ class Product_model extends CI_Model{
                                     ->join('ironing_type it', 'it.id = lti.ironing_type_id','left')
                                     ->select('it.id,it.name')
                                     ->where('lti.laundry_id',$id)->get()->result();
-                                    
+
             return $result;
+        }
+
+        public function get_cart($user_id){
+            $cart = $this->db->from('cart')->where('user_id',$user_id)->get()->row();
+            $order_type = "";
+            if($cart){
+                $product_data = [];
+                $cart_capabilities = $this->db->from('cart_product')->select('capability_name,order_type')->where('cart_id',$cart->id)->group_by('capability_name')->get()->result();
+                foreach($cart_capabilities as $key=>$val){
+                    $order_type = $val->order_type;
+                    $cart_products = $this->db->from('cart_product')
+                                    ->select('id as cart_product_id,laundry_name,total_amount as amount')
+                                    ->where('cart_id',$cart->id)->where('capability_name',$val->capability_name)->get()->result();
+                    
+                    $product_data['capability_name'] = $val->capability_name;
+                    $product_data['cart_products'] = $cart_products;
+                }
+
+                $cart->product_data = $product_data;
+                $cart->product_data = $product_data;
+                $cart->order_type = $order_type;
+            }else{
+                $cart = (object) [];
+            }
+            return $cart;
         }
 
         public function get_checkout($user_id)
         {
-            $result = array();
-            $this->db->where('user_id',$user_id);
-            $query1 = $this->db->get('cart')->row();
-            // print_r($query1->delivery_fees);
-            // exit();
-            $this->db->select('c.id,l.name as laundry_name,c.qty,c.price_total,c.price');
-            $this->db->where('c.user_id',$user_id);
-            $this->db->join('laundries l', 'c.laundry_id = l.id'); 
-            $query = $this->db->get('cart_product c');
-
-            $result['subtotal']=0;
-            $result['delivery fees']=0;
-            $result['discount']=0;
-            $result['total']=0;
-            $result['items']=[];
-            if ($query->num_rows() > 0) {
-                $result['subtotal'] = (int)$query1->subtotal;
-                $result['delivery_fees']=(int)$query1->delivery_fees;
-                $result['discount']=(int)$query1->discount;
-                $result['total'] = (int)$query1->total;
-                $result['items'] = $query->result();
+            $collection_dt_list = [];
+            $curr_datetime1 = $this->curr_date_time;
+            for($i=1;$i<=24;$i++){
+                $curr_datetime1 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
+                $curr_datetime2 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
+                $collection_dt_list[] = $curr_datetime1.' - '.$curr_datetime2;
             }
+
+            // $delivery_dt_list = [];
+            // $curr_datetime1 = $this->curr_date_time;
+            // for($i=1;$i<=24;$i++){
+            //     $curr_datetime1 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
+            //     $curr_datetime2 = date('Y-m-d H:i',strtotime('+1 Hour',strtotime($curr_datetime1)));
+            //     $delivery_dt_list[] = $curr_datetime1.' - '.$curr_datetime2;
+            // }
+
+            $collection_dates = $collection_dt_list;
+            // $delivery_dates = $delivery_dt_list;
+
+            $cart = $this->get_cart($user_id);
+
+            $result['cart'] = $cart;
+            $result['collection_date'] = $collection_dates;
+            $result['delivery_dates'] = $delivery_dates;
             return $result;
         }
+        
     }
 ?>
