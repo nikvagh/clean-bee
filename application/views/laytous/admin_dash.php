@@ -2,8 +2,7 @@
 <html>
   <head>
     <?php $this->load->view(ADMINPATH . 'head'); ?>
-    <title><?php //echo $this->system->company_name;
-            ?> <?php echo $title; ?></title>
+    <title><?php //echo $this->system->company_name; ?> <?php echo $title; ?></title>
     <?php $this->load->view(ADMINPATH . 'common_css'); ?>
   </head>
 
